@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  jupyter:
+    image: agam007/group04:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - .:/home/jovyan
+    command:
+      - start-notebook.sh
+      - --NotebookApp.token=''
+      - --NotebookApp.password=''
+    tty: true
