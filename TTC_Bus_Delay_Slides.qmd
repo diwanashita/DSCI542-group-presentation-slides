@@ -1,0 +1,31 @@
+---
+title: "TTC Bus Delay"
+author: "Agam Sanghera, Ashita Diwan"
+format: revealjs
+---
+
+## Summary
+
+## Introduction
+
+## Analysis
+
+1. **Loading and Preprocessing Data** 
+2. **Visualization** 
+3. **Modelling**
+
+## Analysis: Loading and Preprocessing Data 
+- Handle missing values, 
+- Convert timestamp data to day parts, and 
+- Clean data fields irrelevant to the analysis
+
+
+## Analysis: Visualization 
+- Analyze distribution of delays, 
+- Identify top routes and locations with frequent delay incidents, and
+- Visualize delays based on day and incident type
+
+## Analysis: Modelling
+- Logistic Regression model to predict
+    - "Short", "Medium" or "Long" duration
+- Cross-validation and randomized grid for hyperparameter tuning

@@ -1,0 +1,68 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"TTC Bus Delay\"\n",
+        "author: \"Agam Sanghera, Ashita Diwan\"\n",
+        "format: revealjs\n",
+        "---\n",
+        "\n",
+        "\n",
+        "## Summary\n",
+        "\n",
+        "## Introduction\n",
+        "\n",
+        "## Data\n",
+        "\n",
+        "The data for this analysis was sourced from the [open.toronto.ca](http://open.toronto.ca) website, with a specific emphasis on the bus delay data for the year 2024. Raw data can be found [here](https://open.toronto.ca/dataset/ttc-bus-delay-data/).\n"
+      ],
+      "id": "1d0e30b7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: tbl-ttc_head\n",
+        "#| tbl-cap: Snippet of TTC bus delay data\n",
+        "import pandas as pd\n",
+        "import altair as alt\n",
+        "ttc = pd.read_csv('../data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])\n",
+        "ttc.head()"
+      ],
+      "id": "tbl-ttc_head",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The dataset contains in total `{python} ttc.shape[0]` rows and `{python} ttc.shape[1]` columns. Each row in the dataset represents one instance of delay, specifying its route, date and time, location, classification of bus incident, and its delay duration. A snippet of the dataset is show in @tbl-ttc_head.\n",
+        "\n",
+        "## Analysis\n",
+        "\n",
+        "An EDA analysis is first conducted on the dataset with the folliowing objectives:\n",
+        "\n",
+        "1. **Loading and Preprocessing Data:** Handling missing values, converting timestamp data to day parts, and cleaning data fields irrelevant to our delay analysis.\n",
+        "2. **Visualization:** Analyze the distribution of delays, identify top routes and locations with frequent delay incidents, and visualize delays based on day and incident type.\n",
+        "\n",
+        "A linear regression model is then used to build the classification model to predict whether a delay falls into the short, medium or long duration. The C parameter in the linear regression model is chosen using a 5-fold cross validation with the classification accuracy as the metric.\n",
+        "\n",
+        "The Python programming language (@Python) and the following Python packages are used to perform tbe analysis: numpy (@numpy), Pandas (@pandas), altair (@altair), scikit-learn (@scikit-learn). The code used to perform the analysis and generate the figures can be found [here](https://github.com/UBC-MDS/group04/tree/main/scripts)."
+      ],
+      "id": "a67cd332"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
