@@ -2,11 +2,15 @@
 title: "TTC Bus Delay"
 author: "Agam Sanghera, Ashita Diwan"
 format: revealjs
+
 ---
 
 ## Summary
 
 ## Introduction
+
+# Analysis {style="text-align: center"}
+
 
 ## Analysis
 
@@ -29,3 +33,32 @@ format: revealjs
 - Logistic Regression model to predict
     - "Short", "Medium" or "Long" duration
 - Cross-validation and randomized grid for hyperparameter tuning
+
+# Results and Conclusions {style="text-align: center"}
+
+## Results
+- **EDA** 
+- **Model** 
+
+## EDA
+- **Distributions** 
+- **Reclassified Labels** 
+
+## Model
+- **Model Scores** 
+- **Hyperparameter Tuning**
+- **Cross Validation**
+
+## Conclusion
+- **Interpretation**
+- **Future Scope**
+
+## Interpretation
+- **Comparison of Actual vs Prediction**
+- **Exlpanation of Results**
+
+## Future Scope
+- **Improve Prediction of Long Delays**
+- **Experiment with other techniques**
+
+# Thank you for your attention {style="text-align: center"}
