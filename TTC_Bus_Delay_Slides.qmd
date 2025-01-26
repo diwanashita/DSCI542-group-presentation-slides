@@ -1,13 +1,30 @@
 ---
-title: "TTC Bus Delay"
-author: "Agam Sanghera, Ashita Diwan"
+title: "Toronto Transit Commission (TTC) Bus Delay"
+subtitle: "Group 4"
+author: "Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu"
 format: revealjs
-
 ---
 
-## Summary
+## Introduction
+![Source: Toronto Star](images/ttc_bus_crowded.avif)
 
 ## Introduction
+![Source: Toronto Observer](images/ttc_bus_delay.png)
+
+## Introduction
+- Importance of the topic
+    - Impacts on commuters
+    - Effects on transportation network
+
+## Introduction
+- Purpose of the report
+    - To analyze bus delays in the TTC system
+    - To identify key patterns, causes, and potential solutions for these delays
+
+## Introduction
+- End product: build a logistic regression model to predict future bus delay duration
+    - Better allocate resources
+    - Enhance bus service precision
 
 # Analysis {style="text-align: center"}
 
