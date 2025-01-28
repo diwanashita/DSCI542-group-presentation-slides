@@ -30,21 +30,25 @@ format: revealjs
 
 
 ## Analysis
-
 1. **Loading and Preprocessing Data** 
 2. **Visualization** 
 3. **Modelling**
 
 ## Analysis: Loading and Preprocessing Data 
-- Handle missing values, 
-- Convert timestamp data to day parts, and 
-- Clean data fields irrelevant to the analysis
+::: {.incremental}
+- Handle missing values 
+- Convert to appropriate datatypes
+![](images/data_conversion.png){.absolute top=225 right=30}
+- Performed feature selection
+:::
 
 
 ## Analysis: Visualization 
-- Analyze distribution of delays, 
-- Identify top routes and locations with frequent delay incidents, and
+::: {.incremental}
+- Analyze distribution of delays 
+- Identify top routes and locations with frequent delay incidents
 - Visualize delays based on day and incident type
+:::
 
 ## Analysis: Modelling
 - Logistic Regression model to predict
