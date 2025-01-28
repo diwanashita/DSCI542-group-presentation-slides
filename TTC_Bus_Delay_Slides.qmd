@@ -44,6 +44,22 @@ format: revealjs
 - **Distributions** 
 - **Reclassified Labels** 
 
+## Distribution: Monthly Incidents
+![](results/images/incidents_by_month.png){fig-align="center"}
+
+## Distribution: Daily Incidents
+![](results/images/incidents_by_day.png){fig-align="center"}
+
+## Distribution: Hourly Incidents
+![](results/images/incidents_by_hour.png){fig-align="center"}
+
+## Distribution of Delays
+![](notebooks/delay_dist.png){fig-align="center"}
+
+## Reclassification of Delays
+![](results/images/ReclassifiedLabels.png){fig-align="center"}
+
+
 ## Model
 - **Model Scores** 
 - **Hyperparameter Tuning**

@@ -42,7 +42,7 @@ def main(input_path: str, output_dir: str):
         )
         .properties(title="Distribution of Incident Types")
     )
-    incident_types_chart.save(f"{output_dir}/incident_types.png")
+    incident_types_chart.save(f"{output_dir}/incident_types.png",ppi=600)
     print("Saved: incident_types.png")
 
     # 2. Incidents by Hour
@@ -56,7 +56,7 @@ def main(input_path: str, output_dir: str):
         )
         .properties(title="Hourly Distribution of Incidents")
     )
-    incidents_by_hour.save(f"{output_dir}/incidents_by_hour.png")
+    incidents_by_hour.save(f"{output_dir}/incidents_by_hour.png",ppi=600)
     print("Saved: incidents_by_hour.png")
 
     # 3. Incidents by Day of the Week
@@ -70,7 +70,7 @@ def main(input_path: str, output_dir: str):
         )
         .properties(title="Distribution of Incidents by Day of the Week")
     )
-    delay_by_day.save(f"{output_dir}/incidents_by_day.png")
+    delay_by_day.save(f"{output_dir}/incidents_by_day.png",ppi=600)
     print("Saved: incidents_by_day.png")
 
     # 4. Incidents by Month
@@ -84,7 +84,7 @@ def main(input_path: str, output_dir: str):
         )
         .properties(title="Number of Incidents by Month")
     )
-    incidents_by_month.save(f"{output_dir}/incidents_by_month.png")
+    incidents_by_month.save(f"{output_dir}/incidents_by_month.png",ppi=600)
     print("Saved: incidents_by_month.png")
 
     print("EDA completed. Visualizations saved!")
