@@ -68,7 +68,7 @@ def main(data,preprocessor_from,pipeline,viz,seed):
     # Define order explicitly to reorder bars
     order=["Short","Medium","Long"]
     fig,ax=plt.subplots(1,2)
-    fig.set_dpi(150)
+    fig.set_dpi(600)
     fig.set_label(["Actual Delays","Predicted Delays"])
     ax[0].hist( y_test, label='Actual Delays')
     ax[0].set_xticklabels(labels=order)
