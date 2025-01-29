@@ -26,6 +26,27 @@ format: revealjs
     - Better allocate resources
     - Enhance bus service precision
 
+## Objectives
+- Understand the primary causes of bus delays.
+- Analyze trends based on data (e.g., time of day, location, type of delay).
+- Provide actionable insights to improve service efficiency.
+
+![](images/objectives.png)
+
+## Methodology
+
+**Data Source:** TTC bus delay logs.
+
+**Techniques Used:**
+
+- Statistical methods to identify trends and correlations.
+
+- Data visualization for pattern recognition.
+
+**Tools/Software:** Python (Pandas, Matplotlib, Seaborn).
+
+![](images/methodology.png)
+
 # Analysis {style="text-align: center"}
 
 
