@@ -129,9 +129,16 @@ print(ttc1.isna().sum())
 
 
 ## Model
-- **Model Scores** 
 - **Hyperparameter Tuning**
-- **Cross Validation**
+    + **C : 0.1**
+- **Model Scores** 
+    + **Test Accuracy : 68.32%**
+    + **Training Accuracy: 71.63%**
+    + **Cross Validation Accuracy: 69.53%**
+
+
+## Confusion Matrix
+![](results/images/ConfusionMat.png){fig-align="center"}
 
 ## Conclusion
 - **Interpretation**
@@ -140,6 +147,10 @@ print(ttc1.isna().sum())
 ## Interpretation
 - **Comparison of Actual vs Prediction**
 - **Exlpanation of Results**
+
+## Comparison of Actual vs Predictions
+
+![](results/images/PredictedVsActual.png){fig-align="center"}
 
 ## Future Scope
 - **Improve Prediction of Long Delays**

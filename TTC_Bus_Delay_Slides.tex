@@ -242,6 +242,38 @@
   \end{itemize}
 \end{itemize}
 
+\subsection{Objectives}\label{objectives}
+
+\begin{itemize}
+\tightlist
+\item
+  Understand the primary causes of bus delays.
+\item
+  Analyze trends based on data (e.g., time of day, location, type of
+  delay).
+\item
+  Provide actionable insights to improve service efficiency.
+\end{itemize}
+
+\includegraphics{images/objectives.png}
+
+\subsection{Methodology}\label{methodology}
+
+\textbf{Data Source:} TTC bus delay logs.
+
+\textbf{Techniques Used:}
+
+\begin{itemize}
+\item
+  Statistical methods to identify trends and correlations.
+\item
+  Data visualization for pattern recognition.
+\end{itemize}
+
+\textbf{Tools/Software:} Python (Pandas, Matplotlib, Seaborn).
+
+\includegraphics{images/methodology.png}
+
 \section{Analysis}\label{analysis}
 
 \subsection{Analysis}\label{analysis-1}
@@ -263,11 +295,12 @@ Data}\label{analysis-loading-and-preprocessing-data}
 \begin{itemize}
 \tightlist
 \item
-  Handle missing values,
+  Handle missing values
 \item
-  Convert timestamp data to day parts, and
+  Convert to appropriate datatypes
+  \includegraphics{images/data_conversion.png}
 \item
-  Clean data fields irrelevant to the analysis
+  Performed feature selection
 \end{itemize}
 
 \subsection{Analysis: Visualization}\label{analysis-visualization}
@@ -275,9 +308,9 @@ Data}\label{analysis-loading-and-preprocessing-data}
 \begin{itemize}
 \tightlist
 \item
-  Analyze distribution of delays,
+  Analyze distribution of delays
 \item
-  Identify top routes and locations with frequent delay incidents, and
+  Identify top routes and locations with frequent delay incidents
 \item
   Visualize delays based on day and incident type
 \end{itemize}
@@ -320,17 +353,71 @@ Data}\label{analysis-loading-and-preprocessing-data}
   \textbf{Reclassified Labels}
 \end{itemize}
 
+\subsection{Distribution: Monthly
+Incidents}\label{distribution-monthly-incidents}
+
+\begin{center}
+\includegraphics{results/images/incidents_by_month.png}
+\end{center}
+
+\subsection{Distribution: Daily
+Incidents}\label{distribution-daily-incidents}
+
+\begin{center}
+\includegraphics{results/images/incidents_by_day.png}
+\end{center}
+
+\subsection{Distribution: Hourly
+Incidents}\label{distribution-hourly-incidents}
+
+\begin{center}
+\includegraphics{results/images/incidents_by_hour.png}
+\end{center}
+
+\subsection{Distribution of Delays}\label{distribution-of-delays}
+
+\begin{center}
+\includegraphics{notebooks/delay_dist.png}
+\end{center}
+
+\subsection{Reclassification of
+Delays}\label{reclassification-of-delays}
+
+\begin{center}
+\includegraphics{results/images/ReclassifiedLabels.png}
+\end{center}
+
 \subsection{Model}\label{model}
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Model Scores}
-\item
   \textbf{Hyperparameter Tuning}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{C : 0.1}
+  \end{itemize}
 \item
-  \textbf{Cross Validation}
+  \textbf{Model Scores}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Test Accuracy : 68.32\%}
+  \item
+    \textbf{Training Accuracy: 71.63\%}
+  \item
+    \textbf{Cross Validation Accuracy: 69.53\%}
+  \end{itemize}
 \end{itemize}
+
+\subsection{Confusion Matrix}\label{confusion-matrix}
+
+\begin{center}
+\includegraphics{results/images/ConfusionMat.png}
+\end{center}
 
 \subsection{Conclusion}\label{conclusion}
 
@@ -351,6 +438,13 @@ Data}\label{analysis-loading-and-preprocessing-data}
 \item
   \textbf{Exlpanation of Results}
 \end{itemize}
+
+\subsection{Comparison of Actual vs
+Predictions}\label{comparison-of-actual-vs-predictions}
+
+\begin{center}
+\includegraphics{results/images/PredictedVsActual.png}
+\end{center}
 
 \subsection{Future Scope}\label{future-scope}
 
