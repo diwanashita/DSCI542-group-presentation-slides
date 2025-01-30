@@ -2,7 +2,9 @@
 title: "Toronto Transit Commission (TTC) Bus Delay"
 subtitle: "Group 4"
 author: "Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu"
-format: revealjs
+format: 
+    revealjs:
+        scrollable: false 
 ---
 
 
@@ -58,33 +60,9 @@ format: revealjs
 
 ## Analysis: Loading and Preprocessing Data 
 - Handle missing values 
-// ... existing code ...
-
-## Analysis: Loading and Preprocessing Data 
-- Handle missing values 
+![](images/NANTable.jpg){}
 - Convert to appropriate datatypes
-![](images/data_conversion.png){.absolute top=225 right=30}
-```{python}
-#| echo: true
-import pandas as pd
-# Load the data
-ttc = pd.read_csv('data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])
-
-# Create ttc1 as a copy and process it
-ttc1 = ttc.copy()
-ttc1['Time'] = pd.to_datetime(ttc['Time']).dt.time
-ttc1['Date_'] = ttc1['Date'].dt.date
-ttc1['Month'] = ttc1['Date'].dt.month
-ttc1['Hour'] = ttc1['Time'].map(lambda x: x.hour)
-ttc1 = ttc1.drop(columns=['Date', 'Time'])
-
-# Show missing values
-print(ttc1.isna().sum())
-```
-
-// ... rest of existing code ...
-- Convert to appropriate datatypes
-![](images/data_conversion.png){.absolute top=225 right=30}
+![](images/data_conversion.png){.absolute bottom=-50 right=30}
 
 
 ## Analyze distribution of delays 

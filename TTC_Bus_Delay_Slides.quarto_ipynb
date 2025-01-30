@@ -8,7 +8,9 @@
         "title: \"Toronto Transit Commission (TTC) Bus Delay\"\n",
         "subtitle: \"Group 4\"\n",
         "author: \"Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu\"\n",
-        "format: revealjs\n",
+        "format: \n",
+        "    revealjs:\n",
+        "        scrollable: false \n",
         "---\n",
         "\n",
         "\n",
@@ -72,29 +74,31 @@
         "- Convert to appropriate datatypes\n",
         "![](images/data_conversion.png){.absolute top=225 right=30}"
       ],
-      "id": "e15af8c6"
+      "id": "3aee72f7"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "output-location": "column-fragment"
+      },
+      "source": [
+        "#| label: tbl-ttc_head\n",
+        "#| tbl-cap: Snippet of TTC bus delay data\n",
+        "import pandas as pd\n",
+        "import altair as alt\n",
+        "ttc = pd.read_csv('data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])"
+      ],
+      "id": "tbl-ttc_head",
+      "execution_count": null,
+      "outputs": []
     },
     {
       "cell_type": "code",
       "metadata": {},
       "source": [
-        "#| echo: true\n",
-        "import pandas as pd\n",
-        "# Load the data\n",
-        "ttc = pd.read_csv('data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])\n",
-        "\n",
-        "# Create ttc1 as a copy and process it\n",
-        "ttc1 = ttc.copy()\n",
-        "ttc1['Time'] = pd.to_datetime(ttc['Time']).dt.time\n",
-        "ttc1['Date_'] = ttc1['Date'].dt.date\n",
-        "ttc1['Month'] = ttc1['Date'].dt.month\n",
-        "ttc1['Hour'] = ttc1['Time'].map(lambda x: x.hour)\n",
-        "ttc1 = ttc1.drop(columns=['Date', 'Time'])\n",
-        "\n",
-        "# Show missing values\n",
-        "print(ttc1.isna().sum())"
+        "show(ttc.head())"
       ],
-      "id": "5ee56f81",
+      "id": "9b499976",
       "execution_count": null,
       "outputs": []
     },
@@ -149,9 +153,16 @@
         "\n",
         "\n",
         "## Model\n",
-        "- **Model Scores** \n",
         "- **Hyperparameter Tuning**\n",
-        "- **Cross Validation**\n",
+        "    + **C : 0.1**\n",
+        "- **Model Scores** \n",
+        "    + **Test Accuracy : 68.32%**\n",
+        "    + **Training Accuracy: 71.63%**\n",
+        "    + **Cross Validation Accuracy: 69.53%**\n",
+        "\n",
+        "\n",
+        "## Confusion Matrix\n",
+        "![](results/images/ConfusionMat.png){fig-align=\"center\"}\n",
         "\n",
         "## Conclusion\n",
         "- **Interpretation**\n",
@@ -161,13 +172,17 @@
         "- **Comparison of Actual vs Prediction**\n",
         "- **Exlpanation of Results**\n",
         "\n",
+        "## Comparison of Actual vs Predictions\n",
+        "\n",
+        "![](results/images/PredictedVsActual.png){fig-align=\"center\"}\n",
+        "\n",
         "## Future Scope\n",
         "- **Improve Prediction of Long Delays**\n",
         "- **Experiment with other techniques**\n",
         "\n",
         "# Thank you for your attention {style=\"text-align: center\"}"
       ],
-      "id": "053ad5c7"
+      "id": "b867daea"
     }
   ],
   "metadata": {
