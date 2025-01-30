@@ -1,0 +1,108 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"TTC Bus Delay Report\"\n",
+        "author: \"Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu\"\n",
+        "date: \"16 Dec 2024\"\n",
+        "format:\n",
+        "    pdf:\n",
+        "        toc: true\n",
+        "        toc-depth: 2\n",
+        "    html:\n",
+        "        toc: true\n",
+        "        toc-depth: 2\n",
+        "bibliography: references.bib\n",
+        "execute:\n",
+        "    echo: false\n",
+        "    warning: false\n",
+        "    message: false\n",
+        "editor: source\n",
+        "---\n",
+        "\n",
+        "\n",
+        "## Summary\n",
+        "\n",
+        "This report examines the 2024 TTC bus delay dataset to forecast delay times based on factors such as route, incident type, location, and time. We aim to classify delays into short, medium, and long categories using a logistic regression model. The final logistic regression model show moderate effectiveness in predicting delay durations. Predicted frequencies for short and medium delays correspond with actual data; however, the model underpredicts long delays, highlighting the complexity of accurately capturing extended durations and their contributing factors. This study acts as a foundation for the implementation of real-time prediction models that could aid the Toronto Transit Commission in resource allocation and improving schedule adherence.\n",
+        "\n",
+        "## Introduction\n",
+        "\n",
+        "Public transportation systems, such as Toronto's TTC, are essential for facilitating commuter mobility. However, delays are unavoidable and can affect the efficiency of services. Anticipating these delays may enhance operational decision-making and increase commuter satisfaction. The objective of this analysis is to identify the primary factors contributing to delays and to accurately forecast the duration of these delays by utilizing route, incident types, location, and time-related features as predictors.\n",
+        "\n",
+        "## Data\n",
+        "\n",
+        "The data for this analysis was sourced from the [open.toronto.ca](http://open.toronto.ca) website, with a specific emphasis on the bus delay data for the year 2024. Raw data can be found [here](https://open.toronto.ca/dataset/ttc-bus-delay-data/).\n"
+      ],
+      "id": "4121f5f3"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#| label: tbl-ttc_head\n",
+        "#| tbl-cap: Snippet of TTC bus delay data\n",
+        "import pandas as pd\n",
+        "import altair as alt\n",
+        "ttc = pd.read_csv('../data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])\n",
+        "ttc.head()"
+      ],
+      "id": "tbl-ttc_head",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "The dataset contains in total `{python} ttc.shape[0]` rows and `{python} ttc.shape[1]` columns. Each row in the dataset represents one instance of delay, specifying its route, date and time, location, classification of bus incident, and its delay duration. A snippet of the dataset is show in @tbl-ttc_head.\n",
+        "\n",
+        "## Analysis\n",
+        "\n",
+        "An EDA analysis is first conducted on the dataset with the folliowing objectives:\n",
+        "\n",
+        "1. **Loading and Preprocessing Data:** Handling missing values, converting timestamp data to day parts, and cleaning data fields irrelevant to our delay analysis.\n",
+        "2. **Visualization:** Analyze the distribution of delays, identify top routes and locations with frequent delay incidents, and visualize delays based on day and incident type.\n",
+        "\n",
+        "A linear regression model is then used to build the classification model to predict whether a delay falls into the short, medium or long duration. The C parameter in the linear regression model is chosen using a 5-fold cross validation with the classification accuracy as the metric.\n",
+        "\n",
+        "The Python programming language (@Python) and the following Python packages are used to perform tbe analysis: numpy (@numpy), Pandas (@pandas), altair (@altair), scikit-learn (@scikit-learn). The code used to perform the analysis and generate the figures can be found [here](https://github.com/UBC-MDS/group04/tree/main/scripts).\n",
+        "\n",
+        "## Results and Discussion\n",
+        "\n",
+        "The EDA analysis of the TTC bus delay data uncovers several key insights.\n",
+        "\n",
+        "![](../results/images/incidents_by_hour.png){#fig-incidents_by_hour width=70%}\n",
+        "\n",
+        "@fig-incidents_by_hour shows that majority of the delays occur during the late evenings, most likely due to the influx of people returning back home from work.\n",
+        "\n",
+        "![](../results/images/incidents_by_day.png){#fig-incidents_by_day width=70%}\n",
+        "\n",
+        "@fig-incidents_by_day indicates that Tuesday through Friday are the days with the highest delays, suggesting a potential correlation with weekday commuter traffic.\n",
+        "\n",
+        "![](../results/images/incident_types.png){#fig-incident_types width=70%}\n",
+        "\n",
+        "@fig-incident_types show that mechanical issues are the primary cause of delays, comprising a substantial portion, followed by operator-related operations and diversions. This finding indicates potential areas for intervention, such as improved maintenance or optimized scheduling, to mitigate delay incidents.\n",
+        "\n",
+        "The EDA analysis was very informative in understanding the columns of interest for this project, which will be used to create the logistic regression model to predict the expected delay. The delay output will be categorized into \"Short\", \"Medium\" or \"Long\". 5-fold cross-validation and randomized grid search were applied for C hyperparameter tuning to enhance model performance.\n",
+        "\n",
+        "![](../results/images/PredictedVsActual.png){#fig-predicted_vs_actual width=70%}\n",
+        "\n",
+        "The results of the logistic regression model in @fig-predicted_vs_actual show moderate effectiveness in predicting delay durations. Predicted frequencies for short and medium delays correspond with actual data; however, the model underpredicts long delays, highlighting the complexity of accurately capturing extended durations and their contributing factors. We could explore more advanced predictive models to improve accuracy. Furthermore, more data integration such as weather conditions could enhance model performance."
+      ],
+      "id": "3a9493bc"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "/Users/agamsanghera/Library/Python/3.9/share/jupyter/kernels/python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

@@ -78,7 +78,7 @@ format:
 ## Analysis: Modelling
 - Logistic Regression model to predict
     - "Short", "Medium" or "Long" duration
-- Cross-validation and randomized grid for hyperparameter tuning
+- Cross-validation and randomized search for hyperparameter tuning
 
 # Results and Conclusions {style="text-align: center"}
 
