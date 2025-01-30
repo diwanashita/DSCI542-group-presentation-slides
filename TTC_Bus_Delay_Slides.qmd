@@ -5,6 +5,7 @@ author: "Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu"
 format: revealjs
 ---
 
+
 ## Introduction
 ![Source: Toronto Star](images/ttc_bus_crowded.avif)
 
@@ -56,20 +57,45 @@ format: revealjs
 3. **Modelling**
 
 ## Analysis: Loading and Preprocessing Data 
-::: {.incremental}
+- Handle missing values 
+// ... existing code ...
+
+## Analysis: Loading and Preprocessing Data 
 - Handle missing values 
 - Convert to appropriate datatypes
 ![](images/data_conversion.png){.absolute top=225 right=30}
-- Performed feature selection
-:::
+```{python}
+#| echo: true
+import pandas as pd
+# Load the data
+ttc = pd.read_csv('data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])
+
+# Create ttc1 as a copy and process it
+ttc1 = ttc.copy()
+ttc1['Time'] = pd.to_datetime(ttc['Time']).dt.time
+ttc1['Date_'] = ttc1['Date'].dt.date
+ttc1['Month'] = ttc1['Date'].dt.month
+ttc1['Hour'] = ttc1['Time'].map(lambda x: x.hour)
+ttc1 = ttc1.drop(columns=['Date', 'Time'])
+
+# Show missing values
+print(ttc1.isna().sum())
+```
+
+// ... rest of existing code ...
+- Convert to appropriate datatypes
+![](images/data_conversion.png){.absolute top=225 right=30}
 
 
-## Analysis: Visualization 
-::: {.incremental}
-- Analyze distribution of delays 
-- Identify top routes and locations with frequent delay incidents
-- Visualize delays based on day and incident type
-:::
+## Analyze distribution of delays 
+![](notebooks/delay_dist.png){fig-align="center"}
+
+## Identify top routes and locations with frequent delay incidents
+![](notebooks/top20_delay_routes.png){fig-align="center"}
+
+## Visualize delays based on day and incident type
+![](notebooks/chart_month.png){fig-align="left" width="500" height="550"}
+![](notebooks/chart_incident.png){fig-align="right" width="500" height="500"}
 
 ## Analysis: Modelling
 - Logistic Regression model to predict
