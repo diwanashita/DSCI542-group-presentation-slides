@@ -60,26 +60,9 @@ format:
 
 ## Analysis: Loading and Preprocessing Data 
 - Handle missing values 
-// ... existing code ...
-
-## Analysis: Loading and Preprocessing Data 
-- Handle missing values 
+![](images/NANTable.jpg){}
 - Convert to appropriate datatypes
-![](images/data_conversion.png){.absolute top=225 right=30}
-```{python}
-#| label: tbl-ttc_head
-#| tbl-cap: Snippet of TTC bus delay data
-#| output-location: column-fragment
-import pandas as pd
-import altair as alt
-ttc = pd.read_csv('data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])
-```
-```{python}
-ttc.head()
-```
-// ... rest of existing code ...
-- Convert to appropriate datatypes
-![](images/data_conversion.png){.absolute top=225 right=30}
+![](images/data_conversion.png){.absolute bottom=-50 right=30}
 
 
 ## Analyze distribution of delays 
