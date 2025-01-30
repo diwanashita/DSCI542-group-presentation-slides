@@ -2,7 +2,9 @@
 title: "Toronto Transit Commission (TTC) Bus Delay"
 subtitle: "Group 4"
 author: "Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu"
-format: revealjs
+format: 
+    revealjs:
+        scrollable: false 
 ---
 
 
@@ -65,23 +67,16 @@ format: revealjs
 - Convert to appropriate datatypes
 ![](images/data_conversion.png){.absolute top=225 right=30}
 ```{python}
-#| echo: true
+#| label: tbl-ttc_head
+#| tbl-cap: Snippet of TTC bus delay data
+#| output-location: column-fragment
 import pandas as pd
-# Load the data
+import altair as alt
 ttc = pd.read_csv('data/raw/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])
-
-# Create ttc1 as a copy and process it
-ttc1 = ttc.copy()
-ttc1['Time'] = pd.to_datetime(ttc['Time']).dt.time
-ttc1['Date_'] = ttc1['Date'].dt.date
-ttc1['Month'] = ttc1['Date'].dt.month
-ttc1['Hour'] = ttc1['Time'].map(lambda x: x.hour)
-ttc1 = ttc1.drop(columns=['Date', 'Time'])
-
-# Show missing values
-print(ttc1.isna().sum())
 ```
-
+```{python}
+ttc.head()
+```
 // ... rest of existing code ...
 - Convert to appropriate datatypes
 ![](images/data_conversion.png){.absolute top=225 right=30}
