@@ -8,7 +8,7 @@
 <link href="TTC_Bus_Delay_Slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="TTC_Bus_Delay_Slides_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="TTC_Bus_Delay_Slides_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.5.57">
+  <meta name="generator" content="quarto-1.5.56">
 
   <meta name="author" content="Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu">
   <title>Toronto Transit Commission (TTC) Bus Delay</title>
@@ -481,11 +481,22 @@ Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu
 <section id="model" class="slide level2">
 <h2>Model</h2>
 <ul>
-<li><strong>Model Scores</strong></li>
-<li><strong>Hyperparameter Tuning</strong></li>
-<li><strong>Cross Validation</strong></li>
+<li><strong>Hyperparameter Tuning</strong>
+<ul>
+<li><strong>C : 0.1</strong></li>
+</ul></li>
+<li><strong>Model Scores</strong>
+<ul>
+<li><strong>Test Accuracy : 68.32%</strong></li>
+<li><strong>Training Accuracy: 71.63%</strong></li>
+<li><strong>Cross Validation Accuracy: 69.53%</strong></li>
+</ul></li>
 </ul>
 </section>
+<section id="confusion-matrix" class="slide level2">
+<h2>Confusion Matrix</h2>
+
+<img data-src="results/images/ConfusionMat.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section id="conclusion" class="slide level2">
 <h2>Conclusion</h2>
 <ul>
@@ -500,6 +511,10 @@ Agam Sanghera, Ashita Diwan, Cheng Zhang, Yichun Liu
 <li><strong>Exlpanation of Results</strong></li>
 </ul>
 </section>
+<section id="comparison-of-actual-vs-predictions" class="slide level2">
+<h2>Comparison of Actual vs Predictions</h2>
+
+<img data-src="results/images/PredictedVsActual.png" class="quarto-figure quarto-figure-center r-stretch"></section>
 <section id="future-scope" class="slide level2">
 <h2>Future Scope</h2>
 <ul>

@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>EDA Analysis on TTC Bus Delay Data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="eda_analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="eda_analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="eda_analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="eda_analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="eda_analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="eda_analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="eda_analysis_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="eda_analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="eda_analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="eda_analysis_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">EDA Analysis on TTC Bus Delay Data</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This data was sourced from open.toronto.ca website. Raw data can be found <a href="https://open.toronto.ca/dataset/ttc-bus-delay-data/">here</a>.</p>
+<p>While there are multiple years of data available on this website, we are using 2024 data.</p>
+<p>Our goal is to see how many buses are delayed and by how much time.</p>
+<p>Let’s get started with the EDA!</p>
+<div id="62137a60-6ccb-4eb9-a06a-bac32d3d1ec5" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This code block will be used for all library imports. </span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> altair <span class="im">as</span> alt</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Simplify working with large datasets in Altair</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>alt.data_transformers.enable(<span class="st">'vegafusion'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>DataTransformerRegistry.enable('vegafusion')</code></pre>
+</div>
+</div>
+<section id="loading-and-fixing-data" class="level2">
+<h2 class="anchored" data-anchor-id="loading-and-fixing-data">Loading and Fixing Data</h2>
+<div id="e2e179f6-d233-46c1-8955-016f62535a7f" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's load the data.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># the Dates column is parsed through date argument to make sure it is seen as datetime object.</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ttc <span class="op">=</span> pd.read_csv(<span class="st">'../data/ttc-bus-delay-data-2024.csv'</span>, parse_dates<span class="op">=</span>[<span class="st">'Date'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/jq/qyhs6j1j1nz7gpn_83j90d5w0000gn/T/ipykernel_88403/317655958.py:3: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  ttc = pd.read_csv('data/ttc-bus-delay-data-2024.csv', parse_dates=['Date'])</code></pre>
+</div>
+</div>
+<div id="38962e5b-02fe-4893-816e-d68aaab345d9" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ttc.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Date</th>
+<th data-quarto-table-cell-role="th">Route</th>
+<th data-quarto-table-cell-role="th">Time</th>
+<th data-quarto-table-cell-role="th">Day</th>
+<th data-quarto-table-cell-role="th">Location</th>
+<th data-quarto-table-cell-role="th">Incident</th>
+<th data-quarto-table-cell-role="th">Min Delay</th>
+<th data-quarto-table-cell-role="th">Min Gap</th>
+<th data-quarto-table-cell-role="th">Direction</th>
+<th data-quarto-table-cell-role="th">Vehicle</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>2024-01-01</td>
+<td>89</td>
+<td>02:08</td>
+<td>Monday</td>
+<td>KEELE AND GLENLAKE</td>
+<td>Vision</td>
+<td>10</td>
+<td>20</td>
+<td>N</td>
+<td>7107</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2024-01-01</td>
+<td>39</td>
+<td>02:30</td>
+<td>Monday</td>
+<td>FINCH STATION</td>
+<td>General Delay</td>
+<td>20</td>
+<td>40</td>
+<td>NaN</td>
+<td>8914</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>2024-01-01</td>
+<td>300</td>
+<td>03:13</td>
+<td>Monday</td>
+<td>BLOOR AND MANNING</td>
+<td>General Delay</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8562</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>2024-01-01</td>
+<td>65</td>
+<td>03:23</td>
+<td>Monday</td>
+<td>PARLIAMENT AND BLOOR</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>N</td>
+<td>8574</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>2024-01-01</td>
+<td>113</td>
+<td>03:37</td>
+<td>Monday</td>
+<td>MAIN STATION</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8541</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="515d40df-a7ca-4617-aab5-aba3179f61dc" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># .shape shows up how big our data is</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"This dataset has </span><span class="sc">{</span>ttc<span class="sc">.</span>shape[<span class="dv">0</span>]<span class="sc">}</span><span class="ss"> rows and </span><span class="sc">{</span>ttc<span class="sc">.</span>shape[<span class="dv">1</span>]<span class="sc">}</span><span class="ss"> columns"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>ttc.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>This dataset has 45300 rows and 10 columns</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>(45300, 10)</code></pre>
+</div>
+</div>
+<div id="f161f328-8fe8-4cf7-9d8e-2e37fe495940" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># .info tells us about the object type for each column</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co"># we can see 'Date' column was read as datetime object</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>ttc.info()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 45300 entries, 0 to 45299
+Data columns (total 10 columns):
+ #   Column     Non-Null Count  Dtype         
+---  ------     --------------  -----         
+ 0   Date       45300 non-null  datetime64[ns]
+ 1   Route      44861 non-null  object        
+ 2   Time       45300 non-null  object        
+ 3   Day        45300 non-null  object        
+ 4   Location   45300 non-null  object        
+ 5   Incident   45300 non-null  object        
+ 6   Min Delay  45300 non-null  int64         
+ 7   Min Gap    45300 non-null  int64         
+ 8   Direction  38343 non-null  object        
+ 9   Vehicle    45300 non-null  int64         
+dtypes: datetime64[ns](1), int64(3), object(6)
+memory usage: 3.5+ MB</code></pre>
+</div>
+</div>
+<div id="16c6cba1-847e-47fe-af9e-350c0b6661cb" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's also fix the 'Time' column</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ttc1 <span class="op">=</span> ttc.copy() <span class="co"># preserving the original</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Converting column to datetime object</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>ttc1[<span class="st">'Time'</span>] <span class="op">=</span> pd.to_datetime(ttc[<span class="st">'Time'</span>]).dt.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/jq/qyhs6j1j1nz7gpn_83j90d5w0000gn/T/ipykernel_88403/4215578345.py:5: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  ttc1['Time'] = pd.to_datetime(ttc['Time']).dt.time</code></pre>
+</div>
+</div>
+<p>Now, let’s split ‘Date’ column into ‘Date_’ and ‘Month’ (year is not needed since this is for 2024), and convert ‘Time’ into ‘Hours’ so it more useful in the analysis later on.</p>
+<div id="608f1aaa-630f-42c9-b5a8-51d73e2dfe6c" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ttc1[<span class="st">'Date_'</span>] <span class="op">=</span> ttc1[<span class="st">'Date'</span>].dt.date</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ttc1[<span class="st">'Month'</span>] <span class="op">=</span> ttc1[<span class="st">'Date'</span>].dt.month</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ttc1[<span class="st">'Hour'</span>] <span class="op">=</span> ttc1[<span class="st">'Time'</span>].<span class="bu">map</span>(<span class="kw">lambda</span> x: x.hour) <span class="co"># used ChatGPT for this conversion</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="bb92cb6b-99d6-458d-9071-b5dc6d34e445" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Let's drop the 'Date' and 'Time' column since they are no longer needed</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ttc1 <span class="op">=</span> ttc1.drop(columns<span class="op">=</span>[<span class="st">'Date'</span>, <span class="st">'Time'</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><br></p>
+<hr>
+</section>
+<section id="preprocessing" class="level2">
+<h2 class="anchored" data-anchor-id="preprocessing">Preprocessing</h2>
+<p>Now that the data is loaded in, we want to make sure we don’t perform our analysis will null values. So, we will go through and identify any columns that have big number of null values and determine if they are worth keeping for analysis or not.</p>
+<div id="4a9e8100-3fc4-4d90-8050-33fcc44aef7d" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ttc1.isna().<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>Route         439
+Day             0
+Location        0
+Incident        0
+Min Delay       0
+Min Gap         0
+Direction    6957
+Vehicle         0
+Date_           0
+Month           0
+Hour            0
+dtype: int64</code></pre>
+</div>
+</div>
+<div id="d6961ddb-0e80-4a90-acaa-e0efa6a43459" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 'Direction' column has a lot null values. Let's see if these rows can be dropped</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ttc1[ttc1[<span class="st">'Direction'</span>].isna()].head(<span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Route</th>
+<th data-quarto-table-cell-role="th">Day</th>
+<th data-quarto-table-cell-role="th">Location</th>
+<th data-quarto-table-cell-role="th">Incident</th>
+<th data-quarto-table-cell-role="th">Min Delay</th>
+<th data-quarto-table-cell-role="th">Min Gap</th>
+<th data-quarto-table-cell-role="th">Direction</th>
+<th data-quarto-table-cell-role="th">Vehicle</th>
+<th data-quarto-table-cell-role="th">Date_</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">Hour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>39</td>
+<td>Monday</td>
+<td>FINCH STATION</td>
+<td>General Delay</td>
+<td>20</td>
+<td>40</td>
+<td>NaN</td>
+<td>8914</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>300</td>
+<td>Monday</td>
+<td>BLOOR AND MANNING</td>
+<td>General Delay</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8562</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>113</td>
+<td>Monday</td>
+<td>MAIN STATION</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8541</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">12</td>
+<td>600</td>
+<td>Monday</td>
+<td>LAKESHORE AND THIRTY S</td>
+<td>Cleaning - Unsanitary</td>
+<td>25</td>
+<td>50</td>
+<td>NaN</td>
+<td>8798</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>5</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">13</td>
+<td>300</td>
+<td>Monday</td>
+<td>KIPLING STATION</td>
+<td>Emergency Services</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>3330</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">23</td>
+<td>41</td>
+<td>Monday</td>
+<td>KEELE AND IAN MACDONAL</td>
+<td>Diversion</td>
+<td>780</td>
+<td>793</td>
+<td>NaN</td>
+<td>7251</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>7</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">24</td>
+<td>85</td>
+<td>Monday</td>
+<td>TORONTO ZOO</td>
+<td>Security</td>
+<td>20</td>
+<td>40</td>
+<td>NaN</td>
+<td>3495</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>7</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">27</td>
+<td>NaN</td>
+<td>Monday</td>
+<td>EGLINTON DIVISION</td>
+<td>Operations - Operator</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">28</td>
+<td>12</td>
+<td>Monday</td>
+<td>KENNEDY STATION</td>
+<td>Emergency Services</td>
+<td>30</td>
+<td>60</td>
+<td>NaN</td>
+<td>8408</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>8</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">34</td>
+<td>900</td>
+<td>Monday</td>
+<td>KIPLING STATION</td>
+<td>Operations - Operator</td>
+<td>14</td>
+<td>28</td>
+<td>NaN</td>
+<td>3341</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>9</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">35</td>
+<td>66</td>
+<td>Monday</td>
+<td>OLD MILL STATION</td>
+<td>Mechanical</td>
+<td>25</td>
+<td>50</td>
+<td>NaN</td>
+<td>3329</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">38</td>
+<td>87</td>
+<td>Monday</td>
+<td>EAST YORK ACRES</td>
+<td>General Delay</td>
+<td>52</td>
+<td>62</td>
+<td>NaN</td>
+<td>8579</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>9</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">41</td>
+<td>96</td>
+<td>Monday</td>
+<td>HUMBERLINE LOOP</td>
+<td>Security</td>
+<td>10</td>
+<td>20</td>
+<td>NaN</td>
+<td>3580</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>11</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">49</td>
+<td>60</td>
+<td>Monday</td>
+<td>PIONEER VILLAGE STATIO</td>
+<td>Collision - TTC</td>
+<td>10</td>
+<td>20</td>
+<td>NaN</td>
+<td>8305</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>12</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">56</td>
+<td>106</td>
+<td>Monday</td>
+<td>SHEPPARD WEST STATION</td>
+<td>Mechanical</td>
+<td>12</td>
+<td>24</td>
+<td>NaN</td>
+<td>8352</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>14</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">57</td>
+<td>61</td>
+<td>Monday</td>
+<td>AVENUE AND 401</td>
+<td>Diversion</td>
+<td>350</td>
+<td>360</td>
+<td>NaN</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>15</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">69</td>
+<td>NaN</td>
+<td>Monday</td>
+<td>GUILDWOOD AND KINGSTON</td>
+<td>Utilized Off Route</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8491</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>19</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">73</td>
+<td>165</td>
+<td>Monday</td>
+<td>WESTON AND LANYARD</td>
+<td>Diversion</td>
+<td>10</td>
+<td>49</td>
+<td>NaN</td>
+<td>8920</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>19</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">99</td>
+<td>11</td>
+<td>Monday</td>
+<td>BAYVIEW AND STEELES</td>
+<td>Security</td>
+<td>24</td>
+<td>48</td>
+<td>NaN</td>
+<td>8685</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">104</td>
+<td>300</td>
+<td>Tuesday</td>
+<td>KENNEDY STATION</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8587</td>
+<td>2024-01-02</td>
+<td>1</td>
+<td>4</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><br> Maybe deleting the rows isn’t such a good idea because it makes up for a lot of overall data in the dataset. Instead, let’s drop the column since we already have information about the route. For that reason, it is also okay to drop ‘Vehicle’ column as it is not needed for our goal of observing delays in busses.</p>
+<div id="ae89bf1d-d232-4e31-b44f-bd20de1711e6" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>ttc_clean <span class="op">=</span> ttc1.drop(columns<span class="op">=</span>[<span class="st">'Direction'</span>, <span class="st">'Vehicle'</span>])</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>ttc_clean.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Route</th>
+<th data-quarto-table-cell-role="th">Day</th>
+<th data-quarto-table-cell-role="th">Location</th>
+<th data-quarto-table-cell-role="th">Incident</th>
+<th data-quarto-table-cell-role="th">Min Delay</th>
+<th data-quarto-table-cell-role="th">Min Gap</th>
+<th data-quarto-table-cell-role="th">Date_</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">Hour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>89</td>
+<td>Monday</td>
+<td>KEELE AND GLENLAKE</td>
+<td>Vision</td>
+<td>10</td>
+<td>20</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>39</td>
+<td>Monday</td>
+<td>FINCH STATION</td>
+<td>General Delay</td>
+<td>20</td>
+<td>40</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>300</td>
+<td>Monday</td>
+<td>BLOOR AND MANNING</td>
+<td>General Delay</td>
+<td>0</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>65</td>
+<td>Monday</td>
+<td>PARLIAMENT AND BLOOR</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>113</td>
+<td>Monday</td>
+<td>MAIN STATION</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Now, let’s look at the Route column and its NaNs. This column is particularly important for us for our goal.</p>
+<div id="cb41c4a3-a3a6-4cf2-93b3-8e0b47495c58" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>na_route <span class="op">=</span> ttc1[ttc1[<span class="st">'Route'</span>].isna()]</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>na_route.head(<span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Route</th>
+<th data-quarto-table-cell-role="th">Day</th>
+<th data-quarto-table-cell-role="th">Location</th>
+<th data-quarto-table-cell-role="th">Incident</th>
+<th data-quarto-table-cell-role="th">Min Delay</th>
+<th data-quarto-table-cell-role="th">Min Gap</th>
+<th data-quarto-table-cell-role="th">Direction</th>
+<th data-quarto-table-cell-role="th">Vehicle</th>
+<th data-quarto-table-cell-role="th">Date_</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">Hour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">27</td>
+<td>NaN</td>
+<td>Monday</td>
+<td>EGLINTON DIVISION</td>
+<td>Operations - Operator</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>8</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">69</td>
+<td>NaN</td>
+<td>Monday</td>
+<td>GUILDWOOD AND KINGSTON</td>
+<td>Utilized Off Route</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8491</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>19</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">213</td>
+<td>NaN</td>
+<td>Tuesday</td>
+<td>QUEENSWAY GARAGE</td>
+<td>Mechanical</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>8136</td>
+<td>2024-01-02</td>
+<td>1</td>
+<td>16</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">248</td>
+<td>NaN</td>
+<td>Tuesday</td>
+<td>3RD FLOOR GUNN BUILDIN</td>
+<td>Operations - Operator</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>0</td>
+<td>2024-01-02</td>
+<td>1</td>
+<td>20</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">293</td>
+<td>NaN</td>
+<td>Wednesday</td>
+<td>WILSON TRAINING OPERAT</td>
+<td>Operations - Operator</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>0</td>
+<td>2024-01-03</td>
+<td>1</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">350</td>
+<td>NaN</td>
+<td>Wednesday</td>
+<td>RUSSELL CARHOUSE</td>
+<td>Mechanical</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>349</td>
+<td>2024-01-03</td>
+<td>1</td>
+<td>14</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">602</td>
+<td>NaN</td>
+<td>Thursday</td>
+<td>FINCH STATION</td>
+<td>Operations - Operator</td>
+<td>12</td>
+<td>24</td>
+<td>N</td>
+<td>3253</td>
+<td>2024-01-04</td>
+<td>1</td>
+<td>17</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">624</td>
+<td>NaN</td>
+<td>Thursday</td>
+<td>ARROW GARAGE</td>
+<td>Collision - TTC</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>1371</td>
+<td>2024-01-04</td>
+<td>1</td>
+<td>21</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">638</td>
+<td>NaN</td>
+<td>Thursday</td>
+<td>123 PARKWAY FOREST DRI</td>
+<td>Utilized Off Route</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>3400</td>
+<td>2024-01-04</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">659</td>
+<td>NaN</td>
+<td>Friday</td>
+<td>MOUNT DENNIS DIVISION</td>
+<td>Operations - Operator</td>
+<td>0</td>
+<td>0</td>
+<td>NaN</td>
+<td>0</td>
+<td>2024-01-05</td>
+<td>1</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="37a0c769-2318-4092-a251-3408bf3b8de2" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Now, we will see how many for NaN routes have delays</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>na_route[na_route[<span class="st">'Min Delay'</span>] <span class="op">==</span> <span class="dv">0</span>].count()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>Route          0
+Day          363
+Location     363
+Incident     363
+Min Delay    363
+Min Gap      363
+Direction     68
+Vehicle      363
+Date_        363
+Month        363
+Hour         363
+dtype: int64</code></pre>
+</div>
+</div>
+<p>Since all the NaN routes have 0 delays, it is safe to drop these rows. We will also remove all other null values to ensure a clean dataset to work with</p>
+<div id="406ebf54-54d0-45fe-982c-dc1409b5bd8d" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ttc_clean <span class="op">=</span> ttc_clean.dropna()</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ttc_clean.isna().<span class="bu">sum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>Route        0
+Day          0
+Location     0
+Incident     0
+Min Delay    0
+Min Gap      0
+Date_        0
+Month        0
+Hour         0
+dtype: int64</code></pre>
+</div>
+</div>
+<div id="cc8c41ae-7ee0-4190-b594-3511654b1b54" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ttc_clean.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Route</th>
+<th data-quarto-table-cell-role="th">Day</th>
+<th data-quarto-table-cell-role="th">Location</th>
+<th data-quarto-table-cell-role="th">Incident</th>
+<th data-quarto-table-cell-role="th">Min Delay</th>
+<th data-quarto-table-cell-role="th">Min Gap</th>
+<th data-quarto-table-cell-role="th">Date_</th>
+<th data-quarto-table-cell-role="th">Month</th>
+<th data-quarto-table-cell-role="th">Hour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>89</td>
+<td>Monday</td>
+<td>KEELE AND GLENLAKE</td>
+<td>Vision</td>
+<td>10</td>
+<td>20</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>39</td>
+<td>Monday</td>
+<td>FINCH STATION</td>
+<td>General Delay</td>
+<td>20</td>
+<td>40</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>300</td>
+<td>Monday</td>
+<td>BLOOR AND MANNING</td>
+<td>General Delay</td>
+<td>0</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>65</td>
+<td>Monday</td>
+<td>PARLIAMENT AND BLOOR</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>113</td>
+<td>Monday</td>
+<td>MAIN STATION</td>
+<td>Security</td>
+<td>0</td>
+<td>0</td>
+<td>2024-01-01</td>
+<td>1</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p><br></p>
+<hr>
+</section>
+<section id="visualizing" class="level2">
+<h2 class="anchored" data-anchor-id="visualizing">Visualizing</h2>
+<p>Now it’s the fun part: visualizations! Let’s look at how the delays are distributed in this data</p>
+<div id="b5fb32f5-1fff-4928-b54e-012b70779a29" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter data</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ttc_filtered <span class="op">=</span> ttc_clean[ttc_clean[<span class="st">'Min Delay'</span>] <span class="op">&lt;</span> <span class="dv">200</span>]</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating histogram</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>delay_dist <span class="op">=</span> alt.Chart(ttc_filtered).mark_bar().encode(</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    alt.X(<span class="st">'Min Delay:Q'</span>, <span class="bu">bin</span><span class="op">=</span>alt.Bin(maxbins<span class="op">=</span><span class="dv">50</span>), title<span class="op">=</span><span class="st">'Delay (in minutes)'</span>),</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    alt.Y(<span class="st">'count()'</span>, title<span class="op">=</span><span class="st">'Frequency'</span>)</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Distribution of Delays'</span>,</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Display</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>delay_dist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+
+<style>
+  #altair-viz-d1519869eef749ab829c60bc71130a3f.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-d1519869eef749ab829c60bc71130a3f.vega-embed details,
+  #altair-viz-d1519869eef749ab829c60bc71130a3f.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-d1519869eef749ab829c60bc71130a3f"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-d1519869eef749ab829c60bc71130a3f") {
+      outputDiv = document.getElementById("altair-viz-d1519869eef749ab829c60bc71130a3f");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"__count": 13321, "bin_maxbins_50_Min Delay": 10.0, "bin_maxbins_50_Min Delay_end": 15.0}, {"__count": 6033, "bin_maxbins_50_Min Delay": 20.0, "bin_maxbins_50_Min Delay_end": 25.0}, {"__count": 5080, "bin_maxbins_50_Min Delay": 0.0, "bin_maxbins_50_Min Delay_end": 5.0}, {"__count": 8611, "bin_maxbins_50_Min Delay": 5.0, "bin_maxbins_50_Min Delay_end": 10.0}, {"__count": 2175, "bin_maxbins_50_Min Delay": 30.0, "bin_maxbins_50_Min Delay_end": 35.0}, {"__count": 1560, "bin_maxbins_50_Min Delay": 25.0, "bin_maxbins_50_Min Delay_end": 30.0}, {"__count": 5370, "bin_maxbins_50_Min Delay": 15.0, "bin_maxbins_50_Min Delay_end": 20.0}, {"__count": 125, "bin_maxbins_50_Min Delay": 55.0, "bin_maxbins_50_Min Delay_end": 60.0}, {"__count": 151, "bin_maxbins_50_Min Delay": 50.0, "bin_maxbins_50_Min Delay_end": 55.0}, {"__count": 140, "bin_maxbins_50_Min Delay": 45.0, "bin_maxbins_50_Min Delay_end": 50.0}, {"__count": 28, "bin_maxbins_50_Min Delay": 140.0, "bin_maxbins_50_Min Delay_end": 145.0}, {"__count": 64, "bin_maxbins_50_Min Delay": 90.0, "bin_maxbins_50_Min Delay_end": 95.0}, {"__count": 150, "bin_maxbins_50_Min Delay": 60.0, "bin_maxbins_50_Min Delay_end": 65.0}, {"__count": 54, "bin_maxbins_50_Min Delay": 75.0, "bin_maxbins_50_Min Delay_end": 80.0}, {"__count": 72, "bin_maxbins_50_Min Delay": 80.0, "bin_maxbins_50_Min Delay_end": 85.0}, {"__count": 203, "bin_maxbins_50_Min Delay": 35.0, "bin_maxbins_50_Min Delay_end": 40.0}, {"__count": 32, "bin_maxbins_50_Min Delay": 180.0, "bin_maxbins_50_Min Delay_end": 185.0}, {"__count": 50, "bin_maxbins_50_Min Delay": 115.0, "bin_maxbins_50_Min Delay_end": 120.0}, {"__count": 18, "bin_maxbins_50_Min Delay": 185.0, "bin_maxbins_50_Min Delay_end": 190.0}, {"__count": 63, "bin_maxbins_50_Min Delay": 100.0, "bin_maxbins_50_Min Delay_end": 105.0}, {"__count": 48, "bin_maxbins_50_Min Delay": 105.0, "bin_maxbins_50_Min Delay_end": 110.0}, {"__count": 202, "bin_maxbins_50_Min Delay": 40.0, "bin_maxbins_50_Min Delay_end": 45.0}, {"__count": 65, "bin_maxbins_50_Min Delay": 110.0, "bin_maxbins_50_Min Delay_end": 115.0}, {"__count": 46, "bin_maxbins_50_Min Delay": 95.0, "bin_maxbins_50_Min Delay_end": 100.0}, {"__count": 83, "bin_maxbins_50_Min Delay": 70.0, "bin_maxbins_50_Min Delay_end": 75.0}, {"__count": 20, "bin_maxbins_50_Min Delay": 190.0, "bin_maxbins_50_Min Delay_end": 195.0}, {"__count": 51, "bin_maxbins_50_Min Delay": 120.0, "bin_maxbins_50_Min Delay_end": 125.0}, {"__count": 21, "bin_maxbins_50_Min Delay": 145.0, "bin_maxbins_50_Min Delay_end": 150.0}, {"__count": 60, "bin_maxbins_50_Min Delay": 85.0, "bin_maxbins_50_Min Delay_end": 90.0}, {"__count": 92, "bin_maxbins_50_Min Delay": 65.0, "bin_maxbins_50_Min Delay_end": 70.0}, {"__count": 34, "bin_maxbins_50_Min Delay": 130.0, "bin_maxbins_50_Min Delay_end": 135.0}, {"__count": 25, "bin_maxbins_50_Min Delay": 175.0, "bin_maxbins_50_Min Delay_end": 180.0}, {"__count": 15, "bin_maxbins_50_Min Delay": 160.0, "bin_maxbins_50_Min Delay_end": 165.0}, {"__count": 22, "bin_maxbins_50_Min Delay": 135.0, "bin_maxbins_50_Min Delay_end": 140.0}, {"__count": 27, "bin_maxbins_50_Min Delay": 150.0, "bin_maxbins_50_Min Delay_end": 155.0}, {"__count": 14, "bin_maxbins_50_Min Delay": 155.0, "bin_maxbins_50_Min Delay_end": 160.0}, {"__count": 15, "bin_maxbins_50_Min Delay": 195.0, "bin_maxbins_50_Min Delay_end": 200.0}, {"__count": 29, "bin_maxbins_50_Min Delay": 125.0, "bin_maxbins_50_Min Delay_end": 130.0}, {"__count": 19, "bin_maxbins_50_Min Delay": 165.0, "bin_maxbins_50_Min Delay_end": 170.0}, {"__count": 21, "bin_maxbins_50_Min Delay": 170.0, "bin_maxbins_50_Min Delay_end": 175.0}]}, {"name": "source_0_y_domain___count", "values": [{"min": 14, "max": 13321}]}], "signals": [{"name": "bin_maxbins_50_Min_Delay_bins", "value": {"fields": ["Min Delay"], "fname": "bin_Min Delay", "start": 0.0, "step": 5.0, "stop": 200.0}}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"fill": {"value": "#4c78a8"}, "x2": {"field": "bin_maxbins_50_Min Delay", "scale": "x", "offset": {"signal": "0.5 + (abs(scale(\"x\", datum[\"bin_maxbins_50_Min Delay_end\"]) - scale(\"x\", datum[\"bin_maxbins_50_Min Delay\"])) < 0.25 ? -0.5 * (0.25 - (abs(scale(\"x\", datum[\"bin_maxbins_50_Min Delay_end\"]) - scale(\"x\", datum[\"bin_maxbins_50_Min Delay\"])))) : 0.5)"}}, "x": {"field": "bin_maxbins_50_Min Delay_end", "scale": "x", "offset": {"signal": "0.5 + (abs(scale(\"x\", datum[\"bin_maxbins_50_Min Delay_end\"]) - scale(\"x\", datum[\"bin_maxbins_50_Min Delay\"])) < 0.25 ? 0.5 * (0.25 - (abs(scale(\"x\", datum[\"bin_maxbins_50_Min Delay_end\"]) - scale(\"x\", datum[\"bin_maxbins_50_Min Delay\"])))) : -0.5)"}}, "y": {"field": "__count", "scale": "y"}, "y2": {"value": 0, "scale": "y"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": {"signal": "[bin_maxbins_50_Min_Delay_bins.start, bin_maxbins_50_Min_Delay_bins.stop]"}, "range": [0, {"signal": "width"}], "bins": {"signal": "bin_maxbins_50_Min_Delay_bins"}, "zero": false}, {"name": "y", "type": "linear", "domain": [{"signal": "(data(\"source_0_y_domain___count\")[0] || {}).min"}, {"signal": "(data(\"source_0_y_domain___count\")[0] || {}).max"}], "range": [{"signal": "height"}, 0], "nice": true, "zero": true}], "axes": [{"scale": "y", "maxExtent": 0, "ticks": false, "zindex": 0, "aria": false, "domain": false, "minExtent": 0, "grid": true, "gridScale": "x", "labels": false, "tickCount": {"signal": "ceil(height/40)"}, "orient": "left"}, {"scale": "x", "title": "Delay (in minutes)", "labelFlush": true, "zindex": 0, "labelOverlap": true, "orient": "bottom", "grid": false, "tickCount": {"signal": "ceil(width/10)"}}, {"scale": "y", "orient": "left", "labelOverlap": true, "grid": false, "title": "Frequency", "zindex": 0, "tickCount": {"signal": "ceil(height/40)"}}], "title": {"text": "Distribution of Delays", "frame": "group"}, "background": "white", "height": 300, "width": 300, "padding": 5, "style": "cell"}, {"mode": "vega"});
+</script>
+</div>
+</div>
+<p>This plot shows that majority of the delays occur within 0 to 25 mins. This can indicate that most delays are short in duration.</p>
+<p>Now let’s take a look at top 20 routes with highest delay incidents</p>
+<div id="fc5210d8-1bd9-4e9f-a755-67c9680e5555" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Group by 'Route' and count the occurrences</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>route_counts <span class="op">=</span> ttc_clean.groupby(<span class="st">'Route'</span>).size().reset_index(name<span class="op">=</span><span class="st">'Count'</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort counts in descending order and get the top 20 routes</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>route_counts <span class="op">=</span> route_counts.sort_values(<span class="st">'Count'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>top_routes <span class="op">=</span> route_counts.head(<span class="dv">20</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="co">#top_routes</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating bar chart</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>top20_delay_routes <span class="op">=</span> alt.Chart(top_routes).mark_bar().encode(</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    alt.X(<span class="st">'Route:N'</span>, title<span class="op">=</span><span class="st">'Route'</span>, sort<span class="op">=</span>alt.EncodingSortField(field<span class="op">=</span><span class="st">'Count'</span>, order<span class="op">=</span><span class="st">'descending'</span>)),  <span class="co"># 'N' for nominal (categorical)</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    alt.Y(<span class="st">'Count:Q'</span>, title<span class="op">=</span><span class="st">'Count'</span>),  <span class="co"># 'Q' for quantitative (numerical)</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    alt.Color(<span class="st">'Count:Q'</span>)</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Top 20 Routes with Highest Delay Incidents'</span>,</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Display</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>top20_delay_routes</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+
+<style>
+  #altair-viz-378a24b08cb14989aabd5feb6c05f5aa.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-378a24b08cb14989aabd5feb6c05f5aa.vega-embed details,
+  #altair-viz-378a24b08cb14989aabd5feb6c05f5aa.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-378a24b08cb14989aabd5feb6c05f5aa"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-378a24b08cb14989aabd5feb6c05f5aa") {
+      outputDiv = document.getElementById("altair-viz-378a24b08cb14989aabd5feb6c05f5aa");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0"}, {"name": "data_0", "values": [{"Count": 1387, "Count_end": 1387.0, "Count_start": 0.0, "Route": "32"}, {"Count": 1309, "Count_end": 1309.0, "Count_start": 0.0, "Route": "52"}, {"Count": 1234, "Count_end": 1234.0, "Count_start": 0.0, "Route": "36"}, {"Count": 1072, "Count_end": 1072.0, "Count_start": 0.0, "Route": "35"}, {"Count": 1046, "Count_end": 1046.0, "Count_start": 0.0, "Route": "29"}, {"Count": 982, "Count_end": 982.0, "Count_start": 0.0, "Route": "63"}, {"Count": 777, "Count_end": 777.0, "Count_start": 0.0, "Route": "95"}, {"Count": 771, "Count_end": 771.0, "Count_start": 0.0, "Route": "85"}, {"Count": 746, "Count_end": 746.0, "Count_start": 0.0, "Route": "102"}, {"Count": 744, "Count_end": 744.0, "Count_start": 0.0, "Route": "54"}, {"Count": 743, "Count_end": 743.0, "Count_start": 0.0, "Route": "96"}, {"Count": 736, "Count_end": 736.0, "Count_start": 0.0, "Route": "7"}, {"Count": 677, "Count_end": 677.0, "Count_start": 0.0, "Route": "41"}, {"Count": 661, "Count_end": 661.0, "Count_start": 0.0, "Route": "116"}, {"Count": 647, "Count_end": 647.0, "Count_start": 0.0, "Route": "43"}, {"Count": 644, "Count_end": 644.0, "Count_start": 0.0, "Route": "929"}, {"Count": 610, "Count_end": 610.0, "Count_start": 0.0, "Route": "47"}, {"Count": 607, "Count_end": 607.0, "Count_start": 0.0, "Route": "939"}, {"Count": 584, "Count_end": 584.0, "Count_start": 0.0, "Route": "53"}, {"Count": 578, "Count_end": 578.0, "Count_start": 0.0, "Route": "165"}]}, {"name": "source_0_x_domain_Route", "values": [{"Route": "32", "sort_field": 1387}, {"Route": "52", "sort_field": 1309}, {"Route": "36", "sort_field": 1234}, {"Route": "35", "sort_field": 1072}, {"Route": "29", "sort_field": 1046}, {"Route": "63", "sort_field": 982}, {"Route": "95", "sort_field": 777}, {"Route": "85", "sort_field": 771}, {"Route": "102", "sort_field": 746}, {"Route": "54", "sort_field": 744}, {"Route": "96", "sort_field": 743}, {"Route": "7", "sort_field": 736}, {"Route": "41", "sort_field": 677}, {"Route": "116", "sort_field": 661}, {"Route": "43", "sort_field": 647}, {"Route": "929", "sort_field": 644}, {"Route": "47", "sort_field": 610}, {"Route": "939", "sort_field": 607}, {"Route": "53", "sort_field": 584}, {"Route": "165", "sort_field": 578}]}, {"name": "data_0_color_domain_Count", "values": [{"min": 578, "max": 1387}]}], "signals": [{"name": "x_step", "value": 20}, {"name": "width", "update": "bandspace(domain('x').length, 0.1, 0.05) * x_step"}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "data_0"}, "encode": {"update": {"width": {"signal": "max(0.25, bandwidth('x'))"}, "y2": {"field": "Count_start", "scale": "y"}, "fill": {"field": "Count", "scale": "color"}, "x": {"field": "Route", "scale": "x"}, "y": {"field": "Count_end", "scale": "y"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "band", "domain": {"data": "source_0_x_domain_Route", "field": "Route", "sort": {"op": "max", "field": "sort_field", "order": "descending"}}, "range": {"step": {"signal": "x_step"}}, "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "y", "type": "linear", "domain": {"data": "data_0", "fields": ["Count_start", "Count_end"]}, "range": [{"signal": "height"}, 0], "nice": true, "zero": true}, {"name": "color", "type": "linear", "domain": [{"signal": "(data(\"data_0_color_domain_Count\")[0] || {}).min"}, {"signal": "(data(\"data_0_color_domain_Count\")[0] || {}).max"}], "range": "ramp", "interpolate": "hcl", "zero": false}], "axes": [{"scale": "y", "minExtent": 0, "aria": false, "labels": false, "gridScale": "x", "maxExtent": 0, "ticks": false, "grid": true, "orient": "left", "tickCount": {"signal": "ceil(height/40)"}, "domain": false, "zindex": 0}, {"scale": "x", "labelAlign": "right", "zindex": 0, "grid": false, "labelAngle": 270, "labelBaseline": "middle", "title": "Route", "orient": "bottom"}, {"scale": "y", "zindex": 0, "title": "Count", "orient": "left", "labelOverlap": true, "tickCount": {"signal": "ceil(height/40)"}, "grid": false}], "title": {"text": "Top 20 Routes with Highest Delay Incidents", "frame": "group"}, "background": "white", "height": 300, "padding": 5, "style": "cell", "legends": [{"fill": "color", "gradientLength": {"signal": "clamp(height, 64, 200)"}, "title": "Count"}]}, {"mode": "vega"});
+</script>
+</div>
+</div>
+<p>This plot shows that majority of the incidents are occuring on route 32 with close to 1,400 counts of delays, followed by route 32 and 36. As we move towards other routes, there seems to be a smooth decline in delay counts, showing a decreasing trend.</p>
+<div id="ae2818a6-28c8-407c-9f86-1d8272731283" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Top 10 locations with Highest Delay Counts</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Filter rows where 'Min Delay' is greater than 0 (i.e., there is an actual delay)</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>delayed_ttc <span class="op">=</span> ttc[ttc[<span class="st">'Min Delay'</span>] <span class="op">&gt;</span> <span class="dv">0</span>]</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Group by 'Location' and count the number of delays (i.e., count occurrences where 'Min Delay' &gt; 0)</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>delay_counts <span class="op">=</span> delayed_ttc.groupby(<span class="st">'Location'</span>)[<span class="st">'Min Delay'</span>].count().reset_index()</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Rename the column for clarity</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>delay_counts <span class="op">=</span> delay_counts.rename(columns<span class="op">=</span>{<span class="st">'Min Delay'</span>: <span class="st">'Delay Count'</span>})</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort by 'Delay Count' in descending order</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>delay_counts_sorted <span class="op">=</span> delay_counts.sort_values(by<span class="op">=</span><span class="st">'Delay Count'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the top 10 locations with the highest delay counts</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>top_10_locations <span class="op">=</span> delay_counts_sorted.head(<span class="dv">10</span>)</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the top 10 locations with the highest delay counts</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(top_10_locations)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                    Location  Delay Count
+3675         KENNEDY STATION         1263
+3955         KIPLING STATION          820
+2326        EGLINTON STATION          688
+7713          WILSON STATION          628
+2734           FINCH STATION          623
+5544  PIONEER VILLAGE STATIO          575
+5986  SCARBOROUGH CENTRE STA          431
+7365          WARDEN STATION          419
+8026      YORK MILLS STATION          377
+1688       DON MILLS STATION          371</code></pre>
+</div>
+</div>
+<div id="870e4a5e-9583-4a48-b832-65bcd17c06be" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a bar chart of the top 10 locations with the highest delay counts</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> alt.Chart(top_10_locations).mark_bar().encode(</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Delay Count:Q'</span>, title<span class="op">=</span><span class="st">'Delay Count'</span>),</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Location:N'</span>, title<span class="op">=</span><span class="st">'Location'</span>, sort<span class="op">=</span><span class="st">'-x'</span>),  <span class="co"># Sort by delay count (descending)</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'Location:N'</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Top 10 Locations with the Highest Delay Counts'</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>chart.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+  #altair-viz-2d063d843c7f4f249f5ddbe9e7cc4216.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-2d063d843c7f4f249f5ddbe9e7cc4216.vega-embed details,
+  #altair-viz-2d063d843c7f4f249f5ddbe9e7cc4216.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-2d063d843c7f4f249f5ddbe9e7cc4216"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-2d063d843c7f4f249f5ddbe9e7cc4216") {
+      outputDiv = document.getElementById("altair-viz-2d063d843c7f4f249f5ddbe9e7cc4216");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0"}, {"name": "data_0", "values": [{"Delay Count_end": 1263.0, "Delay Count_start": 0.0, "Location": "KENNEDY STATION"}, {"Delay Count_end": 820.0, "Delay Count_start": 0.0, "Location": "KIPLING STATION"}, {"Delay Count_end": 688.0, "Delay Count_start": 0.0, "Location": "EGLINTON STATION"}, {"Delay Count_end": 628.0, "Delay Count_start": 0.0, "Location": "WILSON STATION"}, {"Delay Count_end": 623.0, "Delay Count_start": 0.0, "Location": "FINCH STATION"}, {"Delay Count_end": 575.0, "Delay Count_start": 0.0, "Location": "PIONEER VILLAGE STATIO"}, {"Delay Count_end": 431.0, "Delay Count_start": 0.0, "Location": "SCARBOROUGH CENTRE STA"}, {"Delay Count_end": 419.0, "Delay Count_start": 0.0, "Location": "WARDEN STATION"}, {"Delay Count_end": 377.0, "Delay Count_start": 0.0, "Location": "YORK MILLS STATION"}, {"Delay Count_end": 371.0, "Delay Count_start": 0.0, "Location": "DON MILLS STATION"}]}, {"name": "source_0_y_domain_Location", "values": [{"Location": "KENNEDY STATION", "sort_field": 1263}, {"Location": "KIPLING STATION", "sort_field": 820}, {"Location": "EGLINTON STATION", "sort_field": 688}, {"Location": "WILSON STATION", "sort_field": 628}, {"Location": "FINCH STATION", "sort_field": 623}, {"Location": "PIONEER VILLAGE STATIO", "sort_field": 575}, {"Location": "SCARBOROUGH CENTRE STA", "sort_field": 431}, {"Location": "WARDEN STATION", "sort_field": 419}, {"Location": "YORK MILLS STATION", "sort_field": 377}, {"Location": "DON MILLS STATION", "sort_field": 371}]}, {"name": "data_0_color_domain_Location", "values": [{"Location": "KENNEDY STATION"}, {"Location": "KIPLING STATION"}, {"Location": "EGLINTON STATION"}, {"Location": "WILSON STATION"}, {"Location": "FINCH STATION"}, {"Location": "PIONEER VILLAGE STATIO"}, {"Location": "SCARBOROUGH CENTRE STA"}, {"Location": "WARDEN STATION"}, {"Location": "YORK MILLS STATION"}, {"Location": "DON MILLS STATION"}]}], "signals": [{"name": "y_step", "value": 20}, {"name": "height", "update": "bandspace(domain('y').length, 0.1, 0.05) * y_step"}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "data_0"}, "encode": {"update": {"height": {"signal": "max(0.25, bandwidth('y'))"}, "fill": {"field": "Location", "scale": "color"}, "x": {"field": "Delay Count_end", "scale": "x"}, "x2": {"field": "Delay Count_start", "scale": "x"}, "y": {"field": "Location", "scale": "y"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": {"data": "data_0", "fields": ["Delay Count_start", "Delay Count_end"]}, "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_Location", "field": "Location", "sort": {"op": "max", "field": "sort_field", "order": "descending"}}, "range": {"step": {"signal": "y_step"}}, "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "color", "type": "ordinal", "domain": {"data": "data_0_color_domain_Location", "field": "Location", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "gridScale": "y", "tickCount": {"signal": "ceil(width/40)"}, "minExtent": 0, "labels": false, "grid": true, "maxExtent": 0, "zindex": 0, "orient": "bottom", "aria": false, "ticks": false, "domain": false}, {"scale": "x", "orient": "bottom", "title": "Delay Count", "grid": false, "tickCount": {"signal": "ceil(width/40)"}, "zindex": 0, "labelOverlap": true, "labelFlush": true}, {"scale": "y", "zindex": 0, "orient": "left", "grid": false, "title": "Location"}], "title": {"text": "Top 10 Locations with the Highest Delay Counts", "frame": "group"}, "style": "cell", "padding": 5, "legends": [{"fill": "color", "symbolType": "square", "title": "Location"}], "background": "white", "width": 300}, {"mode": "vega"});
+</script>
+</div>
+</div>
+<div id="089441bd-520f-470d-8f5a-2f696bc249d0" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Delay Counts by Day of the Week</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>delay_counts_day <span class="op">=</span> delayed_ttc.groupby(<span class="st">'Day'</span>)[<span class="st">'Min Delay'</span>].count().reset_index()</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>delay_counts_day <span class="op">=</span> delay_counts_day.rename(columns<span class="op">=</span>{<span class="st">'Min Delay'</span>: <span class="st">'Delay Count'</span>})</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>delay_counts_day <span class="op">=</span> delay_counts_day.sort_values(by<span class="op">=</span><span class="st">'Delay Count'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Delay Counts by Day of the Week"</span>)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(delay_counts_day)</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot delay counts by Day of the Week</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>chart_month <span class="op">=</span> alt.Chart(delay_counts_day).mark_bar().encode(</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Day:O'</span>, title<span class="op">=</span><span class="st">'Day of the Week'</span>),</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Delay Count:Q'</span>, title<span class="op">=</span><span class="st">'Delay Count'</span>),</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'Day:O'</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Delay Counts by Day of the Week'</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>chart_month.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Delay Counts by Day of the Week
+         Day  Delay Count
+0     Friday         6541
+5    Tuesday         6198
+4   Thursday         6189
+6  Wednesday         6038
+2   Saturday         5662
+1     Monday         5441
+3     Sunday         4149</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+  #altair-viz-9d61bd62ace64271b441f6cf6268a113.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-9d61bd62ace64271b441f6cf6268a113.vega-embed details,
+  #altair-viz-9d61bd62ace64271b441f6cf6268a113.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-9d61bd62ace64271b441f6cf6268a113"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-9d61bd62ace64271b441f6cf6268a113") {
+      outputDiv = document.getElementById("altair-viz-9d61bd62ace64271b441f6cf6268a113");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"Day": "Friday", "Delay Count_end": 6541.0, "Delay Count_start": 0.0}, {"Day": "Tuesday", "Delay Count_end": 6198.0, "Delay Count_start": 0.0}, {"Day": "Thursday", "Delay Count_end": 6189.0, "Delay Count_start": 0.0}, {"Day": "Wednesday", "Delay Count_end": 6038.0, "Delay Count_start": 0.0}, {"Day": "Saturday", "Delay Count_end": 5662.0, "Delay Count_start": 0.0}, {"Day": "Monday", "Delay Count_end": 5441.0, "Delay Count_start": 0.0}, {"Day": "Sunday", "Delay Count_end": 4149.0, "Delay Count_start": 0.0}]}, {"name": "source_0_x_domain_Day", "values": [{"Day": "Friday"}, {"Day": "Tuesday"}, {"Day": "Thursday"}, {"Day": "Wednesday"}, {"Day": "Saturday"}, {"Day": "Monday"}, {"Day": "Sunday"}]}, {"name": "source_0_color_domain_Day", "values": [{"Day": "Friday"}, {"Day": "Tuesday"}, {"Day": "Thursday"}, {"Day": "Wednesday"}, {"Day": "Saturday"}, {"Day": "Monday"}, {"Day": "Sunday"}]}], "signals": [{"name": "x_step", "value": 20}, {"name": "width", "update": "bandspace(domain('x').length, 0.1, 0.05) * x_step"}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"y2": {"field": "Delay Count_start", "scale": "y"}, "fill": {"field": "Day", "scale": "color"}, "width": {"signal": "max(0.25, bandwidth('x'))"}, "y": {"field": "Delay Count_end", "scale": "y"}, "x": {"field": "Day", "scale": "x"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "band", "domain": {"data": "source_0_x_domain_Day", "field": "Day", "sort": true}, "range": {"step": {"signal": "x_step"}}, "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "y", "type": "linear", "domain": {"data": "source_0", "fields": ["Delay Count_start", "Delay Count_end"]}, "range": [{"signal": "height"}, 0], "nice": true, "zero": true}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_Day", "field": "Day", "sort": true}, "range": "ordinal", "interpolate": "hcl"}], "axes": [{"scale": "y", "maxExtent": 0, "aria": false, "labels": false, "tickCount": {"signal": "ceil(height/40)"}, "gridScale": "x", "orient": "left", "ticks": false, "minExtent": 0, "domain": false, "grid": true, "zindex": 0}, {"scale": "x", "zindex": 0, "title": "Day of the Week", "labelAlign": "right", "grid": false, "labelAngle": 270, "labelBaseline": "middle", "orient": "bottom"}, {"scale": "y", "tickCount": {"signal": "ceil(height/40)"}, "grid": false, "zindex": 0, "orient": "left", "title": "Delay Count", "labelOverlap": true}], "title": {"text": "Delay Counts by Day of the Week", "frame": "group"}, "padding": 5, "height": 300, "background": "white", "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "Day"}]}, {"mode": "vega"});
+</script>
+</div>
+</div>
+<div id="1457379e-9e58-4708-9e2e-8f86dabe5d53" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>delay_counts_incident <span class="op">=</span> delayed_ttc.groupby(<span class="st">'Incident'</span>)[<span class="st">'Min Delay'</span>].count().reset_index()</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>delay_counts_incident <span class="op">=</span> delay_counts_incident.rename(columns<span class="op">=</span>{<span class="st">'Min Delay'</span>: <span class="st">'Delay Count'</span>})</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>delay_counts_incident <span class="op">=</span> delay_counts_incident.sort_values(by<span class="op">=</span><span class="st">'Delay Count'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Delay Counts by Incident Type"</span>)</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(delay_counts_incident)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize delay counts by Incident Type</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>chart_incident <span class="op">=</span> alt.Chart(delay_counts_incident).mark_bar().encode(</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Incident:N'</span>, title<span class="op">=</span><span class="st">'Incident Type'</span>, sort<span class="op">=</span><span class="st">'-y'</span>),  <span class="co"># Sort by Delay Count</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Delay Count:Q'</span>, title<span class="op">=</span><span class="st">'Delay Count'</span>),</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'Incident:N'</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Delay Counts by Incident Type'</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>chart_incident.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Delay Counts by Incident Type
+                            Incident  Delay Count
+6                         Mechanical        14846
+7              Operations - Operator         7483
+2                          Diversion         3125
+9                           Security         2838
+1                    Collision - TTC         2772
+3                 Emergency Services         1978
+10                Utilized Off Route         1953
+0              Cleaning - Unsanitary         1764
+11                            Vision         1372
+4                      General Delay         1192
+5                      Investigation          772
+8   Road Blocked - NON-TTC Collision          123</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+  #altair-viz-3bd99bbceb35486d975ec9a997f6182e.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-3bd99bbceb35486d975ec9a997f6182e.vega-embed details,
+  #altair-viz-3bd99bbceb35486d975ec9a997f6182e.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-3bd99bbceb35486d975ec9a997f6182e"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-3bd99bbceb35486d975ec9a997f6182e") {
+      outputDiv = document.getElementById("altair-viz-3bd99bbceb35486d975ec9a997f6182e");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0"}, {"name": "data_0", "values": [{"Delay Count_end": 14846.0, "Delay Count_start": 0.0, "Incident": "Mechanical"}, {"Delay Count_end": 7483.0, "Delay Count_start": 0.0, "Incident": "Operations - Operator"}, {"Delay Count_end": 3125.0, "Delay Count_start": 0.0, "Incident": "Diversion"}, {"Delay Count_end": 2838.0, "Delay Count_start": 0.0, "Incident": "Security"}, {"Delay Count_end": 2772.0, "Delay Count_start": 0.0, "Incident": "Collision - TTC"}, {"Delay Count_end": 1978.0, "Delay Count_start": 0.0, "Incident": "Emergency Services"}, {"Delay Count_end": 1953.0, "Delay Count_start": 0.0, "Incident": "Utilized Off Route"}, {"Delay Count_end": 1764.0, "Delay Count_start": 0.0, "Incident": "Cleaning - Unsanitary"}, {"Delay Count_end": 1372.0, "Delay Count_start": 0.0, "Incident": "Vision"}, {"Delay Count_end": 1192.0, "Delay Count_start": 0.0, "Incident": "General Delay"}, {"Delay Count_end": 772.0, "Delay Count_start": 0.0, "Incident": "Investigation"}, {"Delay Count_end": 123.0, "Delay Count_start": 0.0, "Incident": "Road Blocked - NON-TTC Collision"}]}, {"name": "source_0_x_domain_Incident", "values": [{"Incident": "Mechanical", "sort_field": 14846}, {"Incident": "Operations - Operator", "sort_field": 7483}, {"Incident": "Diversion", "sort_field": 3125}, {"Incident": "Security", "sort_field": 2838}, {"Incident": "Collision - TTC", "sort_field": 2772}, {"Incident": "Emergency Services", "sort_field": 1978}, {"Incident": "Utilized Off Route", "sort_field": 1953}, {"Incident": "Cleaning - Unsanitary", "sort_field": 1764}, {"Incident": "Vision", "sort_field": 1372}, {"Incident": "General Delay", "sort_field": 1192}, {"Incident": "Investigation", "sort_field": 772}, {"Incident": "Road Blocked - NON-TTC Collision", "sort_field": 123}]}, {"name": "data_0_color_domain_Incident", "values": [{"Incident": "Mechanical"}, {"Incident": "Operations - Operator"}, {"Incident": "Diversion"}, {"Incident": "Security"}, {"Incident": "Collision - TTC"}, {"Incident": "Emergency Services"}, {"Incident": "Utilized Off Route"}, {"Incident": "Cleaning - Unsanitary"}, {"Incident": "Vision"}, {"Incident": "General Delay"}, {"Incident": "Investigation"}, {"Incident": "Road Blocked - NON-TTC Collision"}]}], "signals": [{"name": "x_step", "value": 20}, {"name": "width", "update": "bandspace(domain('x').length, 0.1, 0.05) * x_step"}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "data_0"}, "encode": {"update": {"fill": {"field": "Incident", "scale": "color"}, "width": {"signal": "max(0.25, bandwidth('x'))"}, "x": {"field": "Incident", "scale": "x"}, "y": {"field": "Delay Count_end", "scale": "y"}, "y2": {"field": "Delay Count_start", "scale": "y"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "band", "domain": {"data": "source_0_x_domain_Incident", "field": "Incident", "sort": {"op": "max", "field": "sort_field", "order": "descending"}}, "range": {"step": {"signal": "x_step"}}, "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "y", "type": "linear", "domain": {"data": "data_0", "fields": ["Delay Count_start", "Delay Count_end"]}, "range": [{"signal": "height"}, 0], "nice": true, "zero": true}, {"name": "color", "type": "ordinal", "domain": {"data": "data_0_color_domain_Incident", "field": "Incident", "sort": true}, "range": "category"}], "axes": [{"scale": "y", "domain": false, "aria": false, "maxExtent": 0, "minExtent": 0, "orient": "left", "tickCount": {"signal": "ceil(height/40)"}, "ticks": false, "labels": false, "zindex": 0, "grid": true, "gridScale": "x"}, {"scale": "x", "grid": false, "labelAngle": 270, "title": "Incident Type", "labelBaseline": "middle", "zindex": 0, "orient": "bottom", "labelAlign": "right"}, {"scale": "y", "title": "Delay Count", "grid": false, "zindex": 0, "labelOverlap": true, "orient": "left", "tickCount": {"signal": "ceil(height/40)"}}], "title": {"text": "Delay Counts by Incident Type", "frame": "group"}, "height": 300, "background": "white", "legends": [{"fill": "color", "symbolType": "square", "title": "Incident"}], "style": "cell", "padding": 5}, {"mode": "vega"});
+</script>
+</div>
+</div>
+<div id="1a0379e2-7910-49ba-8a22-1d7bb85973c3" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a bar chart of the top 10 locations with the highest delay counts</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> alt.Chart(top_10_locations).mark_bar().encode(</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Delay Count:Q'</span>, title<span class="op">=</span><span class="st">'Delay Count'</span>),</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Location:N'</span>, title<span class="op">=</span><span class="st">'Location'</span>, sort<span class="op">=</span><span class="st">'-x'</span>),  <span class="co"># Sort by delay count (descending)</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'Location:N'</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Top 10 Locations with the Highest Delay Counts'</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>chart.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+  #altair-viz-7fe77b4fd07d46f29591b36e0c1d559f.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-7fe77b4fd07d46f29591b36e0c1d559f.vega-embed details,
+  #altair-viz-7fe77b4fd07d46f29591b36e0c1d559f.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-7fe77b4fd07d46f29591b36e0c1d559f"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-7fe77b4fd07d46f29591b36e0c1d559f") {
+      outputDiv = document.getElementById("altair-viz-7fe77b4fd07d46f29591b36e0c1d559f");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0"}, {"name": "data_0", "values": [{"Delay Count_end": 1263.0, "Delay Count_start": 0.0, "Location": "KENNEDY STATION"}, {"Delay Count_end": 820.0, "Delay Count_start": 0.0, "Location": "KIPLING STATION"}, {"Delay Count_end": 688.0, "Delay Count_start": 0.0, "Location": "EGLINTON STATION"}, {"Delay Count_end": 628.0, "Delay Count_start": 0.0, "Location": "WILSON STATION"}, {"Delay Count_end": 623.0, "Delay Count_start": 0.0, "Location": "FINCH STATION"}, {"Delay Count_end": 575.0, "Delay Count_start": 0.0, "Location": "PIONEER VILLAGE STATIO"}, {"Delay Count_end": 431.0, "Delay Count_start": 0.0, "Location": "SCARBOROUGH CENTRE STA"}, {"Delay Count_end": 419.0, "Delay Count_start": 0.0, "Location": "WARDEN STATION"}, {"Delay Count_end": 377.0, "Delay Count_start": 0.0, "Location": "YORK MILLS STATION"}, {"Delay Count_end": 371.0, "Delay Count_start": 0.0, "Location": "DON MILLS STATION"}]}, {"name": "source_0_y_domain_Location", "values": [{"Location": "KENNEDY STATION", "sort_field": 1263}, {"Location": "KIPLING STATION", "sort_field": 820}, {"Location": "EGLINTON STATION", "sort_field": 688}, {"Location": "WILSON STATION", "sort_field": 628}, {"Location": "FINCH STATION", "sort_field": 623}, {"Location": "PIONEER VILLAGE STATIO", "sort_field": 575}, {"Location": "SCARBOROUGH CENTRE STA", "sort_field": 431}, {"Location": "WARDEN STATION", "sort_field": 419}, {"Location": "YORK MILLS STATION", "sort_field": 377}, {"Location": "DON MILLS STATION", "sort_field": 371}]}, {"name": "data_0_color_domain_Location", "values": [{"Location": "KENNEDY STATION"}, {"Location": "KIPLING STATION"}, {"Location": "EGLINTON STATION"}, {"Location": "WILSON STATION"}, {"Location": "FINCH STATION"}, {"Location": "PIONEER VILLAGE STATIO"}, {"Location": "SCARBOROUGH CENTRE STA"}, {"Location": "WARDEN STATION"}, {"Location": "YORK MILLS STATION"}, {"Location": "DON MILLS STATION"}]}], "signals": [{"name": "y_step", "value": 20}, {"name": "height", "update": "bandspace(domain('y').length, 0.1, 0.05) * y_step"}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "data_0"}, "encode": {"update": {"fill": {"field": "Location", "scale": "color"}, "x2": {"field": "Delay Count_start", "scale": "x"}, "x": {"field": "Delay Count_end", "scale": "x"}, "y": {"field": "Location", "scale": "y"}, "height": {"signal": "max(0.25, bandwidth('y'))"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "linear", "domain": {"data": "data_0", "fields": ["Delay Count_start", "Delay Count_end"]}, "range": [0, {"signal": "width"}], "nice": true, "zero": true}, {"name": "y", "type": "band", "domain": {"data": "source_0_y_domain_Location", "field": "Location", "sort": {"op": "max", "field": "sort_field", "order": "descending"}}, "range": {"step": {"signal": "y_step"}}, "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "color", "type": "ordinal", "domain": {"data": "data_0_color_domain_Location", "field": "Location", "sort": true}, "range": "category"}], "axes": [{"scale": "x", "labels": false, "ticks": false, "orient": "bottom", "zindex": 0, "grid": true, "domain": false, "minExtent": 0, "aria": false, "tickCount": {"signal": "ceil(width/40)"}, "gridScale": "y", "maxExtent": 0}, {"scale": "x", "labelOverlap": true, "orient": "bottom", "title": "Delay Count", "grid": false, "labelFlush": true, "tickCount": {"signal": "ceil(width/40)"}, "zindex": 0}, {"scale": "y", "title": "Location", "zindex": 0, "orient": "left", "grid": false}], "title": {"text": "Top 10 Locations with the Highest Delay Counts", "frame": "group"}, "style": "cell", "legends": [{"fill": "color", "symbolType": "square", "title": "Location"}], "background": "white", "padding": 5, "width": 300}, {"mode": "vega"});
+</script>
+</div>
+</div>
+<div id="c24e4ee1-3fcd-4a38-b316-8fc4e9e73eeb" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Delay Counts by Day of the Week</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>delay_counts_day <span class="op">=</span> delayed_ttc.groupby(<span class="st">'Day'</span>)[<span class="st">'Min Delay'</span>].count().reset_index()</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>delay_counts_day <span class="op">=</span> delay_counts_day.rename(columns<span class="op">=</span>{<span class="st">'Min Delay'</span>: <span class="st">'Delay Count'</span>})</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>delay_counts_day <span class="op">=</span> delay_counts_day.sort_values(by<span class="op">=</span><span class="st">'Delay Count'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Delay Counts by Day of the Week"</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(delay_counts_day)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot delay counts by Day of the Week</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>chart_month <span class="op">=</span> alt.Chart(delay_counts_day).mark_bar().encode(</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Day:O'</span>, title<span class="op">=</span><span class="st">'Day of the Week'</span>),</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Delay Count:Q'</span>, title<span class="op">=</span><span class="st">'Delay Count'</span>),</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'Day:O'</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Delay Counts by Day of the Week'</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>chart_month.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Delay Counts by Day of the Week
+         Day  Delay Count
+0     Friday         6541
+5    Tuesday         6198
+4   Thursday         6189
+6  Wednesday         6038
+2   Saturday         5662
+1     Monday         5441
+3     Sunday         4149</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+  #altair-viz-d35dd89f4e924e0c93f65e1ea0b09b6b.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-d35dd89f4e924e0c93f65e1ea0b09b6b.vega-embed details,
+  #altair-viz-d35dd89f4e924e0c93f65e1ea0b09b6b.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-d35dd89f4e924e0c93f65e1ea0b09b6b"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-d35dd89f4e924e0c93f65e1ea0b09b6b") {
+      outputDiv = document.getElementById("altair-viz-d35dd89f4e924e0c93f65e1ea0b09b6b");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0", "values": [{"Day": "Friday", "Delay Count_end": 6541.0, "Delay Count_start": 0.0}, {"Day": "Tuesday", "Delay Count_end": 6198.0, "Delay Count_start": 0.0}, {"Day": "Thursday", "Delay Count_end": 6189.0, "Delay Count_start": 0.0}, {"Day": "Wednesday", "Delay Count_end": 6038.0, "Delay Count_start": 0.0}, {"Day": "Saturday", "Delay Count_end": 5662.0, "Delay Count_start": 0.0}, {"Day": "Monday", "Delay Count_end": 5441.0, "Delay Count_start": 0.0}, {"Day": "Sunday", "Delay Count_end": 4149.0, "Delay Count_start": 0.0}]}, {"name": "source_0_x_domain_Day", "values": [{"Day": "Friday"}, {"Day": "Tuesday"}, {"Day": "Thursday"}, {"Day": "Wednesday"}, {"Day": "Saturday"}, {"Day": "Monday"}, {"Day": "Sunday"}]}, {"name": "source_0_color_domain_Day", "values": [{"Day": "Friday"}, {"Day": "Tuesday"}, {"Day": "Thursday"}, {"Day": "Wednesday"}, {"Day": "Saturday"}, {"Day": "Monday"}, {"Day": "Sunday"}]}], "signals": [{"name": "x_step", "value": 20}, {"name": "width", "update": "bandspace(domain('x').length, 0.1, 0.05) * x_step"}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "source_0"}, "encode": {"update": {"y2": {"field": "Delay Count_start", "scale": "y"}, "width": {"signal": "max(0.25, bandwidth('x'))"}, "x": {"field": "Day", "scale": "x"}, "fill": {"field": "Day", "scale": "color"}, "y": {"field": "Delay Count_end", "scale": "y"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "band", "domain": {"data": "source_0_x_domain_Day", "field": "Day", "sort": true}, "range": {"step": {"signal": "x_step"}}, "paddingInner": 0.1, "paddingOuter": 0.05}, {"name": "y", "type": "linear", "domain": {"data": "source_0", "fields": ["Delay Count_start", "Delay Count_end"]}, "range": [{"signal": "height"}, 0], "nice": true, "zero": true}, {"name": "color", "type": "ordinal", "domain": {"data": "source_0_color_domain_Day", "field": "Day", "sort": true}, "range": "ordinal", "interpolate": "hcl"}], "axes": [{"scale": "y", "labels": false, "tickCount": {"signal": "ceil(height/40)"}, "grid": true, "aria": false, "orient": "left", "domain": false, "maxExtent": 0, "minExtent": 0, "zindex": 0, "gridScale": "x", "ticks": false}, {"scale": "x", "title": "Day of the Week", "labelAlign": "right", "labelBaseline": "middle", "zindex": 0, "labelAngle": 270, "grid": false, "orient": "bottom"}, {"scale": "y", "zindex": 0, "labelOverlap": true, "title": "Delay Count", "orient": "left", "tickCount": {"signal": "ceil(height/40)"}, "grid": false}], "title": {"text": "Delay Counts by Day of the Week", "frame": "group"}, "style": "cell", "background": "white", "padding": 5, "legends": [{"fill": "color", "symbolType": "square", "title": "Day"}], "height": 300}, {"mode": "vega"});
+</script>
+</div>
+</div>
+<div id="a193aca3-2f37-49de-be3b-f18d697340ae" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>delay_counts_incident <span class="op">=</span> delayed_ttc.groupby(<span class="st">'Incident'</span>)[<span class="st">'Min Delay'</span>].count().reset_index()</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>delay_counts_incident <span class="op">=</span> delay_counts_incident.rename(columns<span class="op">=</span>{<span class="st">'Min Delay'</span>: <span class="st">'Delay Count'</span>})</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>delay_counts_incident <span class="op">=</span> delay_counts_incident.sort_values(by<span class="op">=</span><span class="st">'Delay Count'</span>, ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Delay Counts by Incident Type"</span>)</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(delay_counts_incident)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize delay counts by Incident Type</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>chart_incident <span class="op">=</span> alt.Chart(delay_counts_incident).mark_bar().encode(</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span>alt.X(<span class="st">'Incident:N'</span>, title<span class="op">=</span><span class="st">'Incident Type'</span>, sort<span class="op">=</span><span class="st">'-y'</span>),  <span class="co"># Sort by Delay Count</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>alt.Y(<span class="st">'Delay Count:Q'</span>, title<span class="op">=</span><span class="st">'Delay Count'</span>),</span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    color<span class="op">=</span><span class="st">'Incident:N'</span></span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>).properties(</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">'Delay Counts by Incident Type'</span></span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>chart_incident.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Delay Counts by Incident Type
+                            Incident  Delay Count
+6                         Mechanical        14846
+7              Operations - Operator         7483
+2                          Diversion         3125
+9                           Security         2838
+1                    Collision - TTC         2772
+3                 Emergency Services         1978
+10                Utilized Off Route         1953
+0              Cleaning - Unsanitary         1764
+11                            Vision         1372
+4                      General Delay         1192
+5                      Investigation          772
+8   Road Blocked - NON-TTC Collision          123</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+
+<style>
+  #altair-viz-a6a26307956c4bb1b07bfdf1a5b6678a.vega-embed {
+    width: 100%;
+    display: flex;
+  }
+
+  #altair-viz-a6a26307956c4bb1b07bfdf1a5b6678a.vega-embed details,
+  #altair-viz-a6a26307956c4bb1b07bfdf1a5b6678a.vega-embed details summary {
+    position: relative;
+  }
+</style>
+<div id="altair-viz-a6a26307956c4bb1b07bfdf1a5b6678a"></div>
+<script type="text/javascript">
+  var VEGA_DEBUG = (typeof VEGA_DEBUG == "undefined") ? {} : VEGA_DEBUG;
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-a6a26307956c4bb1b07bfdf1a5b6678a") {
+      outputDiv = document.getElementById("altair-viz-a6a26307956c4bb1b07bfdf1a5b6678a");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm/vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm/vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm/vega-lite@5.20.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm/vega-embed@6?noext",
+    };
+
+    function maybeLoadScript(lib, version) {
+      var key = `${lib.replace("-", "")}_version`;
+      return (VEGA_DEBUG[key] == version) ?
+        Promise.resolve(paths[lib]) :
+        new Promise(function(resolve, reject) {
+          var s = document.createElement('script');
+          document.getElementsByTagName("head")[0].appendChild(s);
+          s.async = true;
+          s.onload = () => {
+            VEGA_DEBUG[key] = version;
+            return resolve(paths[lib]);
+          };
+          s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+          s.src = paths[lib];
+        });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else {
+      maybeLoadScript("vega", "5")
+        .then(() => maybeLoadScript("vega-lite", "5.20.1"))
+        .then(() => maybeLoadScript("vega-embed", "6"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"$schema": "https://vega.github.io/schema/vega/v5.json", "data": [{"name": "source_0"}, {"name": "data_0", "values": [{"Delay Count_end": 14846.0, "Delay Count_start": 0.0, "Incident": "Mechanical"}, {"Delay Count_end": 7483.0, "Delay Count_start": 0.0, "Incident": "Operations - Operator"}, {"Delay Count_end": 3125.0, "Delay Count_start": 0.0, "Incident": "Diversion"}, {"Delay Count_end": 2838.0, "Delay Count_start": 0.0, "Incident": "Security"}, {"Delay Count_end": 2772.0, "Delay Count_start": 0.0, "Incident": "Collision - TTC"}, {"Delay Count_end": 1978.0, "Delay Count_start": 0.0, "Incident": "Emergency Services"}, {"Delay Count_end": 1953.0, "Delay Count_start": 0.0, "Incident": "Utilized Off Route"}, {"Delay Count_end": 1764.0, "Delay Count_start": 0.0, "Incident": "Cleaning - Unsanitary"}, {"Delay Count_end": 1372.0, "Delay Count_start": 0.0, "Incident": "Vision"}, {"Delay Count_end": 1192.0, "Delay Count_start": 0.0, "Incident": "General Delay"}, {"Delay Count_end": 772.0, "Delay Count_start": 0.0, "Incident": "Investigation"}, {"Delay Count_end": 123.0, "Delay Count_start": 0.0, "Incident": "Road Blocked - NON-TTC Collision"}]}, {"name": "source_0_x_domain_Incident", "values": [{"Incident": "Mechanical", "sort_field": 14846}, {"Incident": "Operations - Operator", "sort_field": 7483}, {"Incident": "Diversion", "sort_field": 3125}, {"Incident": "Security", "sort_field": 2838}, {"Incident": "Collision - TTC", "sort_field": 2772}, {"Incident": "Emergency Services", "sort_field": 1978}, {"Incident": "Utilized Off Route", "sort_field": 1953}, {"Incident": "Cleaning - Unsanitary", "sort_field": 1764}, {"Incident": "Vision", "sort_field": 1372}, {"Incident": "General Delay", "sort_field": 1192}, {"Incident": "Investigation", "sort_field": 772}, {"Incident": "Road Blocked - NON-TTC Collision", "sort_field": 123}]}, {"name": "data_0_color_domain_Incident", "values": [{"Incident": "Mechanical"}, {"Incident": "Operations - Operator"}, {"Incident": "Diversion"}, {"Incident": "Security"}, {"Incident": "Collision - TTC"}, {"Incident": "Emergency Services"}, {"Incident": "Utilized Off Route"}, {"Incident": "Cleaning - Unsanitary"}, {"Incident": "Vision"}, {"Incident": "General Delay"}, {"Incident": "Investigation"}, {"Incident": "Road Blocked - NON-TTC Collision"}]}], "signals": [{"name": "x_step", "value": 20}, {"name": "width", "update": "bandspace(domain('x').length, 0.1, 0.05) * x_step"}], "marks": [{"type": "rect", "name": "marks", "from": {"data": "data_0"}, "encode": {"update": {"width": {"signal": "max(0.25, bandwidth('x'))"}, "y": {"field": "Delay Count_end", "scale": "y"}, "x": {"field": "Incident", "scale": "x"}, "y2": {"field": "Delay Count_start", "scale": "y"}, "fill": {"field": "Incident", "scale": "color"}}}, "style": ["bar"]}], "scales": [{"name": "x", "type": "band", "domain": {"data": "source_0_x_domain_Incident", "field": "Incident", "sort": {"op": "max", "field": "sort_field", "order": "descending"}}, "range": {"step": {"signal": "x_step"}}, "paddingOuter": 0.05, "paddingInner": 0.1}, {"name": "y", "type": "linear", "domain": {"data": "data_0", "fields": ["Delay Count_start", "Delay Count_end"]}, "range": [{"signal": "height"}, 0], "zero": true, "nice": true}, {"name": "color", "type": "ordinal", "domain": {"data": "data_0_color_domain_Incident", "field": "Incident", "sort": true}, "range": "category"}], "axes": [{"scale": "y", "zindex": 0, "grid": true, "gridScale": "x", "tickCount": {"signal": "ceil(height/40)"}, "maxExtent": 0, "orient": "left", "domain": false, "labels": false, "aria": false, "ticks": false, "minExtent": 0}, {"scale": "x", "labelAngle": 270, "labelBaseline": "middle", "zindex": 0, "grid": false, "title": "Incident Type", "labelAlign": "right", "orient": "bottom"}, {"scale": "y", "orient": "left", "tickCount": {"signal": "ceil(height/40)"}, "grid": false, "zindex": 0, "title": "Delay Count", "labelOverlap": true}], "title": {"text": "Delay Counts by Incident Type", "frame": "group"}, "padding": 5, "height": 300, "background": "white", "legends": [{"fill": "color", "symbolType": "square", "title": "Incident"}], "style": "cell"}, {"mode": "vega"});
+</script>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

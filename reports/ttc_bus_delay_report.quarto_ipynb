@@ -36,7 +36,7 @@
         "\n",
         "The data for this analysis was sourced from the [open.toronto.ca](http://open.toronto.ca) website, with a specific emphasis on the bus delay data for the year 2024. Raw data can be found [here](https://open.toronto.ca/dataset/ttc-bus-delay-data/).\n"
       ],
-      "id": "f0a348b8"
+      "id": "9891fcde"
     },
     {
       "cell_type": "code",
@@ -92,7 +92,7 @@
         "\n",
         "The results of the logistic regression model in @fig-predicted_vs_actual show moderate effectiveness in predicting delay durations. Predicted frequencies for short and medium delays correspond with actual data; however, the model underpredicts long delays, highlighting the complexity of accurately capturing extended durations and their contributing factors. We could explore more advanced predictive models to improve accuracy. Furthermore, more data integration such as weather conditions could enhance model performance."
       ],
-      "id": "77079254"
+      "id": "f8c48743"
     }
   ],
   "metadata": {
